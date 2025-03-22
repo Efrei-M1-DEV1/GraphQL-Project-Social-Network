@@ -1,0 +1,17 @@
+# System Files
+.DS_Store
+
+# Node.js
+node_modules
+*.log
+.npm
+.cache
+.env
+*.local
+
+# Build Artifacts
+dist
+dist-ssr
+public/dist
+server/dist
+.turbo
