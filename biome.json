@@ -12,7 +12,6 @@
         "noSvgWithoutTitle": "off"
       },
       "style": {
-        "useNamingConvention": "error",
         "noShoutyConstants": "warn",
         "useBlockStatements": "info",
         "useCollapsedElseIf": "warn",
