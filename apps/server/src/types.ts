@@ -7,6 +7,7 @@ export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: 
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
 export type Incremental<T> = T | { [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never };
+export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: { input: string; output: string };
@@ -16,17 +17,47 @@ export type Scalars = {
   Float: { input: number; output: number };
 };
 
+export type Article = {
+  __typename?: "Article";
+  author: User;
+  content: Scalars["String"]["output"];
+  createdAt: Scalars["String"]["output"];
+  id: Scalars["Int"]["output"];
+  title: Scalars["String"]["output"];
+  updatedAt: Scalars["String"]["output"];
+};
+
 export type Query = {
   __typename?: "Query";
+  article?: Maybe<Article>;
+  articles: Array<Article>;
+  articlesByAuthor: Array<Article>;
   hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
 
+export type QueryArticleArgs = {
+  id: Scalars["Int"]["input"];
+};
+
+export type QueryArticlesArgs = {
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+};
+
+export type QueryArticlesByAuthorArgs = {
+  after?: InputMaybe<Scalars["Int"]["input"]>;
+  authorId: Scalars["Int"]["input"];
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+};
+
 export type User = {
   __typename?: "User";
+  createdAt: Scalars["String"]["output"];
   email: Scalars["String"]["output"];
   id: Scalars["Int"]["output"];
   name?: Maybe<Scalars["String"]["output"]>;
+  updatedAt: Scalars["String"]["output"];
 };
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -101,6 +132,7 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
+  Article: ResolverTypeWrapper<Article>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
   Int: ResolverTypeWrapper<Scalars["Int"]["output"]>;
   Query: ResolverTypeWrapper<{}>;
@@ -110,6 +142,7 @@ export type ResolversTypes = {
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
+  Article: Article;
   Boolean: Scalars["Boolean"]["output"];
   Int: Scalars["Int"]["output"];
   Query: {};
@@ -117,10 +150,31 @@ export type ResolversParentTypes = {
   User: User;
 };
 
+export type ArticleResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Article"] = ResolversParentTypes["Article"],
+> = {
+  author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  title?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"],
 > = {
+  article?: Resolver<Maybe<ResolversTypes["Article"]>, ParentType, ContextType, RequireFields<QueryArticleArgs, "id">>;
+  articles?: Resolver<Array<ResolversTypes["Article"]>, ParentType, ContextType, Partial<QueryArticlesArgs>>;
+  articlesByAuthor?: Resolver<
+    Array<ResolversTypes["Article"]>,
+    ParentType,
+    ContextType,
+    RequireFields<QueryArticlesByAuthorArgs, "authorId">
+  >;
   hello?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   users?: Resolver<Array<ResolversTypes["User"]>, ParentType, ContextType>;
 };
@@ -129,13 +183,16 @@ export type UserResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"],
 > = {
+  createdAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   email?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = DataSourceContext> = {
+  Article?: ArticleResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
