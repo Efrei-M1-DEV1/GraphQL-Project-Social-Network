@@ -8,7 +8,7 @@
     "start": "npm run compile && node ./dist/index.js",
     "dev": "node --import ./scripts/register.js --watch src/index.ts",
     "lint": "biome check --write --unsafe --no-errors-on-unmatched ./src",
-    "codegen": "graphql-codegen",
+    "codegen": "graphql-codegen --config codegen.ts",
     "prisma": "prisma"
   },
   "dependencies": {

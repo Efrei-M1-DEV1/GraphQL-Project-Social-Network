@@ -5,6 +5,7 @@
     "lineWidth": 130
   },
   "linter": {
+    "ignore": ["./apps/server/src/types.ts"],
     "enabled": true,
     "rules": {
       "recommended": true,
