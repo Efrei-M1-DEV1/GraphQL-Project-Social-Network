@@ -5,7 +5,7 @@ import { type UixComponent, uix } from "../factory";
  * The Spinner component variants.
  */
 const spinnerVariants = cva(
-  "inline-block animate-spin rounded-full border-2 border-current border-s-transparent duration-slowest",
+  "inline-block animate-spin rounded-full border-2 border-current duration-slowest [border-inline-start-color:transparent]",
   {
     variants: {
       /**
