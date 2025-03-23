@@ -10,11 +10,13 @@
     "lint": "biome check --write --unsafe --no-errors-on-unmatched ./src"
   },
   "dependencies": {
+    "@reduxjs/toolkit": "^2.6.1",
     "@apollo/client": "^3.13.5",
     "@repo/ui": "workspace:*",
     "next-themes": "^0.4.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-redux": "^9.2.0",
     "react-router": "^7.4.0",
     "react-scan": "^0.2.13"
   },
