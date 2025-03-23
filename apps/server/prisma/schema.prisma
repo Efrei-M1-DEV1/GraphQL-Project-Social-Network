@@ -8,7 +8,50 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  name      String?
+  password  String    // Will be hashed with bcrypt
+  articles  Article[] @relation(name: "UserArticles")
+  comments  Comment[] @relation(name: "UserComments")
+  likes     Like[]    @relation(name: "UserLikes")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([name]) // Index for potential name searches
+}
+
+model Article {
+  id        Int       @id @default(autoincrement())
+  title     String
+  content   String
+  author    User      @relation(fields: [authorId], references: [id], name: "UserArticles", onDelete: Cascade)
+  authorId  Int
+  comments  Comment[] @relation(name: "ArticleComments")
+  likes     Like[]    @relation(name: "ArticleLikes")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([title]) // Index for title searches
+}
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  content   String
+  author    User      @relation(fields: [authorId], references: [id], name: "UserComments", onDelete: Cascade)
+  authorId  Int
+  article   Article   @relation(fields: [articleId], references: [id], name: "ArticleComments", onDelete: Cascade)
+  articleId Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Like {
+  id        Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [id], name: "UserLikes", onDelete: Cascade)
+  userId    Int
+  article   Article   @relation(fields: [articleId], references: [id], name: "ArticleLikes", onDelete: Cascade)
+  articleId Int
+  createdAt DateTime  @default(now())
+  @@unique([userId, articleId]) // Prevents duplicate likes
 }
