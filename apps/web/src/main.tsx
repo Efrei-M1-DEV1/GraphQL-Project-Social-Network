@@ -5,7 +5,7 @@ import { Provider as ReduxProvider } from "react-redux";
 import { RouterProvider } from "react-router"; // ensure using react-router-dom 6.4+
 import { scan } from "react-scan"; // must be imported before React and React DOM
 import { store } from "./app/store";
-import { ThemeProvider } from "./components/providers/theme.tsx";
+import { ThemeProvider } from "./providers/theme";
 import { router } from "./routes";
 import "./styles/globals.css";
 
@@ -21,7 +21,7 @@ if (!root) {
 }
 
 const client = new ApolloClient({
-  uri: "https://rickandmortyapi.com/graphql",
+  uri: "http://localhost:4000",
   cache: new InMemoryCache(),
 });
 
