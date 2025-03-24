@@ -32,9 +32,15 @@ importers:
       '@prisma/client':
         specifier: ^6.5.0
         version: 6.5.0(prisma@6.5.0(typescript@5.8.2))(typescript@5.8.2)
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.4.7
       graphql:
         specifier: ^16.10.0
         version: 16.10.0
@@ -44,6 +50,9 @@ importers:
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
+      zod:
+        specifier: ^3.24.2
+        version: 3.24.2
     devDependencies:
       '@graphql-codegen/cli':
         specifier: ^5.0.5
