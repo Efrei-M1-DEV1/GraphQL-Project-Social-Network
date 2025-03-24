@@ -16,6 +16,11 @@ export const typeDefs = `#graphql
     updatedAt: String!
   }
 
+  type AuthPayload {
+    token: String!
+    user: User!
+  }
+
   type Query {
     hello: String
     users: [User!]!
@@ -28,5 +33,7 @@ export const typeDefs = `#graphql
     createArticle(title: String!, content: String!): Article!
     updateArticle(id: Int!, title: String, content: String): Article!
     deleteArticle(id: Int!): Boolean!
+    register(email: String!, password: String!, name: String!): AuthPayload!
+    login(email: String!, password: String!): AuthPayload!
   }
 `;
