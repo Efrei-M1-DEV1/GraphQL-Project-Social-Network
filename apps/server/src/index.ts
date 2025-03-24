@@ -14,9 +14,8 @@ const { url } = await startStandaloneServer(server, {
   listen: { port: 4000 },
   context: async () => {
     return {
-      dataSources: {
-        db,
-      },
+      dataSources: { db },
+      user: { id: 2 }, // Mock user (ID 1); replace with real auth later
     } satisfies DataSourceContext;
   },
 });

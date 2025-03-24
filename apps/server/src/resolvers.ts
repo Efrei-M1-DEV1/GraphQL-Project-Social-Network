@@ -72,4 +72,70 @@ export const resolvers: Resolvers = {
       }));
     },
   },
+  Mutation: {
+    createArticle: async (_parent, { title, content }, context: DataSourceContext) => {
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+      const article = await context.dataSources.db.article.create({
+        data: {
+          title,
+          content,
+          authorId: context.user.id,
+        },
+        include: { author: true },
+      });
+      return {
+        ...article,
+        createdAt: article.createdAt.toISOString(),
+        updatedAt: article.updatedAt.toISOString(),
+        author: {
+          ...article.author,
+          createdAt: article.author.createdAt.toISOString(),
+          updatedAt: article.author.updatedAt.toISOString(),
+        },
+      };
+    },
+    updateArticle: async (_parent, { id, title, content }, context: DataSourceContext) => {
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+      const article = await context.dataSources.db.article.findUnique({ where: { id } });
+      if (!article) {
+        throw new Error("Article not found");
+      }
+      if (article.authorId !== context.user.id) {
+        throw new Error("Forbidden: You can only update your own articles");
+      }
+      const updatedArticle = await context.dataSources.db.article.update({
+        where: { id },
+        data: { title: title ?? undefined, content: content ?? undefined },
+        include: { author: true },
+      });
+      return {
+        ...updatedArticle,
+        createdAt: updatedArticle.createdAt.toISOString(),
+        updatedAt: updatedArticle.updatedAt.toISOString(),
+        author: {
+          ...updatedArticle.author,
+          createdAt: updatedArticle.author.createdAt.toISOString(),
+          updatedAt: updatedArticle.author.updatedAt.toISOString(),
+        },
+      };
+    },
+    deleteArticle: async (_parent, { id }, context: DataSourceContext) => {
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+      const article = await context.dataSources.db.article.findUnique({ where: { id } });
+      if (!article) {
+        throw new Error("Article not found");
+      }
+      if (article.authorId !== context.user.id) {
+        throw new Error("Forbidden: You can only delete your own articles");
+      }
+      await context.dataSources.db.article.delete({ where: { id } });
+      return true;
+    },
+  },
 };

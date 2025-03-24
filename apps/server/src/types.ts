@@ -27,6 +27,28 @@ export type Article = {
   updatedAt: Scalars["String"]["output"];
 };
 
+export type Mutation = {
+  __typename?: "Mutation";
+  createArticle: Article;
+  deleteArticle: Scalars["Boolean"]["output"];
+  updateArticle: Article;
+};
+
+export type MutationCreateArticleArgs = {
+  content: Scalars["String"]["input"];
+  title: Scalars["String"]["input"];
+};
+
+export type MutationDeleteArticleArgs = {
+  id: Scalars["Int"]["input"];
+};
+
+export type MutationUpdateArticleArgs = {
+  content?: InputMaybe<Scalars["String"]["input"]>;
+  id: Scalars["Int"]["input"];
+  title?: InputMaybe<Scalars["String"]["input"]>;
+};
+
 export type Query = {
   __typename?: "Query";
   article?: Maybe<Article>;
@@ -135,6 +157,7 @@ export type ResolversTypes = {
   Article: ResolverTypeWrapper<Article>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
   Int: ResolverTypeWrapper<Scalars["Int"]["output"]>;
+  Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars["String"]["output"]>;
   User: ResolverTypeWrapper<User>;
@@ -145,6 +168,7 @@ export type ResolversParentTypes = {
   Article: Article;
   Boolean: Scalars["Boolean"]["output"];
   Int: Scalars["Int"]["output"];
+  Mutation: {};
   Query: {};
   String: Scalars["String"]["output"];
   User: User;
@@ -161,6 +185,20 @@ export type ArticleResolvers<
   title?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MutationResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"],
+> = {
+  createArticle?: Resolver<
+    ResolversTypes["Article"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateArticleArgs, "content" | "title">
+  >;
+  deleteArticle?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationDeleteArticleArgs, "id">>;
+  updateArticle?: Resolver<ResolversTypes["Article"], ParentType, ContextType, RequireFields<MutationUpdateArticleArgs, "id">>;
 };
 
 export type QueryResolvers<
@@ -193,6 +231,7 @@ export type UserResolvers<
 
 export type Resolvers<ContextType = DataSourceContext> = {
   Article?: ArticleResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
