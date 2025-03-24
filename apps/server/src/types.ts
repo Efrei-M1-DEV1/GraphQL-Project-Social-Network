@@ -27,6 +27,29 @@ export type Article = {
   updatedAt: Scalars["String"]["output"];
 };
 
+export type AuthPayload = {
+  __typename?: "AuthPayload";
+  token: Scalars["String"]["output"];
+  user: User;
+};
+
+export type Mutation = {
+  __typename?: "Mutation";
+  login: AuthPayload;
+  register: AuthPayload;
+};
+
+export type MutationLoginArgs = {
+  email: Scalars["String"]["input"];
+  password: Scalars["String"]["input"];
+};
+
+export type MutationRegisterArgs = {
+  email: Scalars["String"]["input"];
+  name: Scalars["String"]["input"];
+  password: Scalars["String"]["input"];
+};
+
 export type Query = {
   __typename?: "Query";
   article?: Maybe<Article>;
@@ -133,8 +156,10 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Article: ResolverTypeWrapper<Article>;
+  AuthPayload: ResolverTypeWrapper<AuthPayload>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
   Int: ResolverTypeWrapper<Scalars["Int"]["output"]>;
+  Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars["String"]["output"]>;
   User: ResolverTypeWrapper<User>;
@@ -143,8 +168,10 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Article: Article;
+  AuthPayload: AuthPayload;
   Boolean: Scalars["Boolean"]["output"];
   Int: Scalars["Int"]["output"];
+  Mutation: {};
   Query: {};
   String: Scalars["String"]["output"];
   User: User;
@@ -161,6 +188,33 @@ export type ArticleResolvers<
   title?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type AuthPayloadResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["AuthPayload"] = ResolversParentTypes["AuthPayload"],
+> = {
+  token?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MutationResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"],
+> = {
+  login?: Resolver<
+    ResolversTypes["AuthPayload"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationLoginArgs, "email" | "password">
+  >;
+  register?: Resolver<
+    ResolversTypes["AuthPayload"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationRegisterArgs, "email" | "name" | "password">
+  >;
 };
 
 export type QueryResolvers<
@@ -193,6 +247,8 @@ export type UserResolvers<
 
 export type Resolvers<ContextType = DataSourceContext> = {
   Article?: ArticleResolvers<ContextType>;
+  AuthPayload?: AuthPayloadResolvers<ContextType>;
+  Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
