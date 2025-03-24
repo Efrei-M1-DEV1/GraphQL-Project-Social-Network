@@ -30,6 +30,9 @@ export const typeDefs = `#graphql
   }
 
   type Mutation {
+    createArticle(title: String!, content: String!): Article!
+    updateArticle(id: Int!, title: String, content: String): Article!
+    deleteArticle(id: Int!): Boolean!
     register(email: String!, password: String!, name: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
   }
