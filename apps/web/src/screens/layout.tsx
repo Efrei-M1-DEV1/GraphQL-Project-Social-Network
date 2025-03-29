@@ -1,3 +1,6 @@
+import { Box } from "@repo/ui/layout/box";
+import { Container } from "@repo/ui/layout/container";
+
 type RootLayoutProps = {
   children?: React.ReactNode;
 };
@@ -5,5 +8,9 @@ type RootLayoutProps = {
 export default function RootLayout(props: RootLayoutProps) {
   const { children } = props;
 
-  return children;
+  return (
+    <Container className="max-w-screen-md p-5 duration-moderate">
+      <Box className="overflow-hidden rounded-xl border p-3">{children}</Box>
+    </Container>
+  );
 }
