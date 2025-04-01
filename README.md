@@ -34,6 +34,21 @@ Follow these steps to set up the project locally:
     ```
 ---
 2. **Install dependencies:**
+    - Ensure that **Node.js** is installed by running:
+        ```bash
+        node -v
+        ```
+      If Node.js is not installed, download and install it from [nodejs.org](https://nodejs.org/).
+
+    - Install **pnpm** globally (if not already installed):
+        ```bash
+        npm i -g pnpm
+        ```
+      Verify the installation by running:
+        ```bash
+        pnpm -v
+        ```
+
     - Install dependencies for the entire monorepo (covers `apps/*` and `packages/*`):
         ```bash
         pnpm install
