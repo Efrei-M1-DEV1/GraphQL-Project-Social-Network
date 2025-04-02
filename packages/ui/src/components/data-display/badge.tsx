@@ -3,7 +3,6 @@ import type { Props } from "@repo/utils/types";
 import { Children, cloneElement, isValidElement } from "react";
 import { LuX } from "react-icons/lu";
 import { type UixComponent, uix } from "../factory";
-import { Icon } from "../media/icon";
 
 const badgeVariant = cva("inline-flex items-center rounded-sm gap-1 font-medium tabular-nums whitespace-nowrap select-none", {
   variants: {
@@ -65,7 +64,7 @@ export const Badge: UixComponent<"span", BadgeProps> = (props) => {
       {content}
       {closable ? (
         <button className="inline-flex items-center justify-center" type="button" onClick={onClick}>
-          <Icon as={LuX} />
+          <LuX className="inline-block size-[1em] min-h-[1lh] shrink-0 align-middle text-current leading-[1em]" />
         </button>
       ) : null}
     </uix.span>

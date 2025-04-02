@@ -1,11 +1,10 @@
 import { type VariantProps, cn, cva } from "@repo/utils/classes";
 import { composeRefs } from "@repo/utils/compose-refs";
 import { createContext } from "@repo/utils/create-context";
-import type { Assign } from "@repo/utils/types";
+import type { Assign, Props } from "@repo/utils/types";
+import { cloneElement } from "react";
 import { LuX } from "react-icons/lu";
 import { type UixComponent, uix } from "../factory";
-import { AbsoluteCenter } from "../layout/absolute-center";
-import { Icon } from "../media/icon";
 
 /**
  * The variants of the Button component.
@@ -23,14 +22,14 @@ const buttonVariants = cva(
         xl: "h-12 min-w-12 gap-2.5 px-5 text-md leading-6",
       },
       variant: {
-        ghost: "bg-current bg-opacity-0 text-gray-900 hover:bg-opacity-20 active:bg-opacity-10",
-        link: "hover:underline active:text-opacity-70",
+        ghost: "rounded-sm bg-current bg-opacity-0 text-gray-900 hover:bg-opacity-20 active:bg-opacity-10",
+        link: "h-auto min-w-0 rounded-xs p-0 decoration-[color-mix(in_srgb,currentColor_20%,transparent)] underline-offset-[3px] hover:underline",
         outline:
-          "border border-current border-opacity-20 bg-current bg-opacity-0 text-gray-900 hover:bg-opacity-20 active:bg-opacity-10",
-        plain: "rounded-none",
-        solid: "bg-gray-900 text-[var(--bg-contrast)] hover:bg-opacity-85 active:bg-opacity-100",
-        subtle: "bg-current bg-opacity-10 text-gray-900 hover:bg-opacity-20 active:bg-opacity-10",
-        unstyled: "h-auto min-w-0 gap-0 rounded-none px-0 leading-none",
+          "rounded-sm border border-current border-opacity-20 bg-current bg-opacity-0 text-gray-900 hover:bg-opacity-20 active:bg-opacity-10",
+        plain: "",
+        solid: "rounded-sm bg-gray-900 text-[var(--bg-contrast)] hover:bg-opacity-85 active:bg-opacity-100",
+        subtle: "rounded-sm bg-current bg-opacity-10 text-gray-900 hover:bg-opacity-20 active:bg-opacity-10",
+        unstyled: "h-auto min-w-0 gap-0 px-0 leading-none",
       },
     },
     defaultVariants: {
@@ -100,7 +99,7 @@ export const Button: UixComponent<"button", ButtonProps> = (props) => {
     asChild,
     children,
     className,
-    disabled,
+    disabled: disabledProp,
     loading,
     loadingText,
     ref,
@@ -115,6 +114,8 @@ export const Button: UixComponent<"button", ButtonProps> = (props) => {
 
   const size = sizeProp ?? sizeContext;
   const variant = variantProp ?? variantContext;
+
+  const disabled = disabledProp || loading;
 
   const spinner = spinnerProp;
 
@@ -132,10 +133,15 @@ export const Button: UixComponent<"button", ButtonProps> = (props) => {
       asChild={asChild}
       className={cn(
         buttonVariants({ size, variant }),
-        disabled && "disabled:cursor-not-allowed disabled:bg-opacity-100 disabled:opacity-50",
+        disabled && "disabled:cursor-not-allowed disabled:opacity-50",
+        disabled && variant === "solid" && "disabled:bg-opacity-100",
+        disabled && variant === "subtle" && "disabled:bg-opacity-10",
+        disabled && variant === "outline" && "disabled:bg-opacity-0",
+        disabled && variant === "ghost" && "disabled:bg-opacity-0",
+        disabled && variant === "link" && "disabled:no-underline",
         className,
       )}
-      disabled={disabled || loading}
+      disabled={disabled}
       type={type}
       {...remainingProps}
     >
@@ -147,7 +153,9 @@ export const Button: UixComponent<"button", ButtonProps> = (props) => {
           </>
         ) : (
           <>
-            <AbsoluteCenter className="inline-flex items-center justify-center">{spinner}</AbsoluteCenter>
+            <div className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 inline-flex items-center justify-center">
+              {spinner}
+            </div>
             <span className="invisible">{children}</span>
           </>
         )
@@ -166,22 +174,27 @@ Button.displayName = "Button";
  *
  * -----------------------------------------------------------------------------*/
 export const IconButton: UixComponent<"button", Assign<ButtonProps, { icon: React.ReactElement }>> = (props) => {
-  const { children, className, icon, size = "md", ...remainingProps } = props;
+  const { children, className, icon, size: sizeProp, variant: variantProp, ...remainingProps } = props;
+
+  const { size: sizeContext, variant: variantContext } = useButtonContext();
+
+  const size = sizeProp || sizeContext;
+  const variant = variantProp || variantContext;
+
+  const content = cloneElement(icon as React.ReactElement<Props>, {
+    className: cn(
+      "text-[1.2em]",
+      size === "2xs" && "size-3",
+      (size === "xs" || size === "sm") && "size-4",
+      (size === "md" || size === "lg") && "size-5",
+      size === "xl" && "size-6",
+      (icon as React.ReactElement<Props>).props.className,
+    ),
+  });
 
   return (
-    <Button className={cn("p-0", className)} size={size} {...remainingProps}>
-      <Icon
-        className={cn(
-          "text-[1.2em]",
-          size === "2xs" && "size-3",
-          (size === "xs" || size === "sm") && "size-4",
-          (size === "md" || size === "lg") && "size-5",
-          size === "xl" && "size-6",
-        )}
-        asChild
-      >
-        {icon}
-      </Icon>
+    <Button className={cn("p-0", className)} size={size} variant={variant} {...remainingProps}>
+      {content}
       {children}
     </Button>
   );
@@ -195,12 +208,15 @@ IconButton.displayName = "IconButton";
  *
  * -----------------------------------------------------------------------------*/
 export const CloseButton: UixComponent<"button", ButtonProps> = (props) => {
-  const { children, className, size, variant = "ghost", ...remainingProps } = props;
+  const { children, className, size: sizeProp, variant: variantProp = "ghost", ...remainingProps } = props;
 
   const { size: sizeContext, variant: variantContext } = useButtonContext();
 
+  const size = sizeProp || sizeContext;
+  const variant = variantProp || variantContext;
+
   return (
-    <IconButton icon={<LuX />} size={size || sizeContext} variant={variant || variantContext} {...(remainingProps as object)}>
+    <IconButton icon={<LuX />} size={size} variant={variant} {...remainingProps}>
       <span className="sr-only">Close</span>
     </IconButton>
   );
