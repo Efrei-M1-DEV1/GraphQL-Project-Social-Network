@@ -7,10 +7,19 @@ import { generateToken } from "./utils/jwt.js";
 export const resolvers: Resolvers = {
   Query: {
     hello: async () => {
-      await new Promise((resolve) => setTimeout(resolve, 5000));
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       return "Hello, GraphQL!";
     },
     users: async (_parent, _args, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       const users = await context.dataSources.db.user.findMany();
       return users.map((user) => ({
         ...user,
@@ -19,6 +28,11 @@ export const resolvers: Resolvers = {
       }));
     },
     article: async (_parent, { id }, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       const article = await context.dataSources.db.article.findUnique({
         where: { id },
         include: { author: true },
@@ -38,6 +52,11 @@ export const resolvers: Resolvers = {
       };
     },
     articles: async (_parent, { first, after }, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       const articles = await context.dataSources.db.article.findMany({
         take: first || 10,
         skip: after || 0,
@@ -56,6 +75,11 @@ export const resolvers: Resolvers = {
       }));
     },
     articlesByAuthor: async (_parent, { authorId, first, after }, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       const articles = await context.dataSources.db.article.findMany({
         where: { authorId },
         take: first || 10,
@@ -77,6 +101,11 @@ export const resolvers: Resolvers = {
   },
   Mutation: {
     createArticle: async (_parent, { title, content }, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       if (!context.user) {
         throw new Error("Unauthorized: Please log in");
       }
@@ -100,6 +129,11 @@ export const resolvers: Resolvers = {
       };
     },
     updateArticle: async (_parent, { id, title, content }, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       if (!context.user) {
         throw new Error("Unauthorized: Please log in");
       }
@@ -127,6 +161,11 @@ export const resolvers: Resolvers = {
       };
     },
     deleteArticle: async (_parent, { id }, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       if (!context.user) {
         throw new Error("Unauthorized: Please log in");
       }
@@ -141,6 +180,11 @@ export const resolvers: Resolvers = {
       return true;
     },
     register: async (_parent, args, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       const parsed = registerSchema.safeParse(args);
       if (!parsed.success) {
         throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
@@ -167,6 +211,11 @@ export const resolvers: Resolvers = {
       };
     },
     login: async (_parent, args, context: DataSourceContext) => {
+      // Simulate a delay for demonstration purposes
+      if (process.env.NODE_ENV === "development") {
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+      }
+
       const parsed = loginSchema.safeParse(args);
       if (!parsed.success) {
         throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
