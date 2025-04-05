@@ -68,9 +68,14 @@ Link.displayName = "Link";
 export const LinkBox: UixComponent<"div"> = (props) => {
   const { className, children, ...remainingProps } = props;
 
+  // Context value is separated for potential future modifications or extensions.
+  const contextValue: LinkContextValue = {
+    extraClassName: "relative",
+  };
+
   return (
     <uix.div className={cn("relative", className)} {...remainingProps}>
-      <LinkProvider value={{ extraClassName: "relative" }}>{children}</LinkProvider>
+      <LinkProvider value={contextValue}>{children}</LinkProvider>
     </uix.div>
   );
 };
@@ -83,7 +88,7 @@ LinkBox.displayName = "LinkBox";
  *
  * -----------------------------------------------------------------------------*/
 export const LinkOverlay: UixComponent<"a", LinkProps> = (props) => {
-  const { className, to, ...remainingProps } = props;
+  const { children, className, ...remainingProps } = props;
 
   return (
     <Link
@@ -92,7 +97,9 @@ export const LinkOverlay: UixComponent<"a", LinkProps> = (props) => {
         className,
       )}
       {...remainingProps}
-    />
+    >
+      {children}
+    </Link>
   );
 };
 LinkOverlay.displayName = "LinkOverlay";

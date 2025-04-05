@@ -1,7 +1,7 @@
 import { composeRefs } from "@repo/utils/compose-refs";
 import { mergeProps } from "@repo/utils/merge-props";
 import type { Assign, Dict, HTMLProps, PropsOf } from "@repo/utils/types";
-import { Children, cloneElement, createElement, isValidElement } from "react";
+import { Children, cloneElement, createElement, isValidElement, memo } from "react";
 
 /**
  * Props for polymorphic components, allowing the use of a different element type or child element.
@@ -139,7 +139,8 @@ export const jsxFactory = () => {
     get(_, element) {
       const asElement = element as React.ElementType;
       if (!cache.has(asElement)) {
-        cache.set(asElement, withAsChild(asElement));
+        const memoizedComponent = memo(withAsChild(asElement));
+        cache.set(asElement, memoizedComponent);
       }
       return cache.get(asElement);
     },
