@@ -14,6 +14,8 @@ This is a social network web application where users can register, post articles
     - Planned, not yet implemented.
 - **Liking Articles**:  
     - Planned, not yet implemented.
+- **Development Mode Enhancements**:
+    - Simulated resolver delay added for testing purposes in development environments. This simulates network latency to better test the application's responsiveness.
 
 ## Tech Stack
 
@@ -59,8 +61,10 @@ Follow these steps to set up the project locally:
 3. **Set up the database:**
 
 #### ✅ For macOS/Linux (bash/zsh)
-- Create a `.env` file in `apps/server/` with:  
-    ```bash 
+- Create a `.env` file in `apps/server/` with:
+    ```bash
+    echo "NODE_ENV=development" > apps/server/.env
+    echo "PORT=4000" > apps/server/.env # Change this if needed
     echo "DATABASE_URL=file:./prisma/dev.db" > apps/server/.env
     echo "JWT_SECRET=$(openssl rand -base64 32)" >> apps/server/.env
     ```
@@ -74,14 +78,18 @@ Follow these steps to set up the project locally:
 **Option 1: Automatic Command**
 - Create the `.env` file and set environment variables:
     ```powershell
+    echo "NODE_ENV=development" > apps/server/.env
+    echo "PORT=4000" > apps/server/.env # Change this if needed
     "DATABASE_URL=file:./prisma/dev.db" | Out-File -FilePath apps/server/.env
     "JWT_SECRET=$([convert]::ToBase64String((1..32 | ForEach-Object {Get-Random -Minimum 0 -Maximum 256})))" | Out-File -Append -FilePath apps/server/.env
     ```
-    
+
 **Option 2: Manual Method**
-1. Create a `.env` file inside `apps/server/`.  
+1. Create a `.env` file inside `apps/server/`.
 2. Add the following lines using a text editor:
     ```
+    NODE_ENV=development
+    PORT=4000 # Change this if needed
     DATABASE_URL=file:./prisma/dev.db
     JWT_SECRET=your-secret-key-here
     ```
@@ -92,8 +100,8 @@ Follow these steps to set up the project locally:
     cd apps/server
     pnpm prisma migrate dev --name init
     ```
-
 ---
+
 4. **Start the servers:**
     - **Backend (Apollo Server):**
         ```bash
@@ -112,7 +120,7 @@ Follow these steps to set up the project locally:
 ## Usage
 
 - Open your browser and navigate to `http://localhost:5173` to access the frontend. (UI in progress).
-- Visit `http://localhost:4000` to explore the GraphQL Playground and test queries.
+- Visit `http://localhost:4000` to explore the GraphQL Playground and test queries. Note that in development mode, a simulated delay is added to resolver responses to simulate network latency.
 - Core features commenting, and liking are still in development.
 
 ## Contributing
