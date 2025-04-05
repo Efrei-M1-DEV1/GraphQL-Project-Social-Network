@@ -29,27 +29,72 @@ Follow these steps to set up the project locally:
 
 1. **Clone the repository:**
     ```bash
-    git clone git@github.com:Efrei-M1-DEV1/GraphQL-Project-Social-Network.git
+    git clone https://github.com/Efrei-M1-DEV1/GraphQL-Project-Social-Network.git
     cd GraphQL-Project-Social-Network
     ```
+---
 2. **Install dependencies:**
+    - Ensure that **Node.js** is installed by running:
+        ```bash
+        node -v
+        ```
+      If Node.js is not installed, download and install it from [nodejs.org](https://nodejs.org/).
+
+    - Install **pnpm** globally (if not already installed):
+        ```bash
+        npm i -g pnpm
+        ```
+      Verify the installation by running:
+        ```bash
+        pnpm -v
+        ```
+
     - Install dependencies for the entire monorepo (covers `apps/*` and `packages/*`):
         ```bash
         pnpm install
         ```
     > ***Note:** This project uses `pnpm` as the package manager, as specified in `pnpm-workspace.yaml`.*
-    
+
+    ---
 3. **Set up the database:**
-    - Create a `.env` file in `apps/server/` with:
-        ```bash
-        echo "DATABASE_URL=file:./prisma/dev.db" > apps/server/.env
-        echo "JWT_SECRET=$(openssl rand -base64 32)" >> apps/server/.env
-        ```
-    - Run Prisma migrations to initialize the SQLite database:
-        ```bash
-        cd apps/server
-        pnpm prisma migrate dev --name init
-        ```
+
+#### ✅ For macOS/Linux (bash/zsh)
+- Create a `.env` file in `apps/server/` with:  
+    ```bash 
+    echo "DATABASE_URL=file:./prisma/dev.db" > apps/server/.env
+    echo "JWT_SECRET=$(openssl rand -base64 32)" >> apps/server/.env
+    ```
+- Run Prisma migrations to initialize the SQLite database:
+    ```bash
+    cd apps/server
+    pnpm prisma migrate dev --name init
+    ```
+
+#### ✅ For Windows (PowerShell)
+**Option 1: Automatic Command**
+- Create the `.env` file and set environment variables:
+    ```powershell
+    "DATABASE_URL=file:./prisma/dev.db" | Out-File -FilePath apps/server/.env
+    "JWT_SECRET=$([convert]::ToBase64String((1..32 | ForEach-Object {Get-Random -Minimum 0 -Maximum 256})))" | Out-File -Append -FilePath apps/server/.env
+    ```
+    
+**Option 2: Manual Method**
+1. Create a `.env` file inside `apps/server/`.  
+2. Add the following lines using a text editor:
+    ```
+    DATABASE_URL=file:./prisma/dev.db
+    JWT_SECRET=your-secret-key-here
+    ```
+   (Replace `"your-secret-key-here"` with a manually generated key or an online generator.)
+
+- Then, run the Prisma migration:
+    ```powershell
+    cd apps/server
+    pnpm prisma migrate dev --name init
+    ```
+
+---
+
 4. **Start the servers:**
     - **Backend (Apollo Server):**
         ```bash
@@ -63,6 +108,7 @@ Follow these steps to set up the project locally:
         pnpm dev
         ```
       - Runs on `http://localhost:5173` by default.
+---        
 
 ## Usage
 
