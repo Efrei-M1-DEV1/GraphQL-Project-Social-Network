@@ -37,7 +37,7 @@ type AbsoluteCenterProps = VariantProps<typeof centerVariants>;
 export const AbsoluteCenter: UixComponent<"div", AbsoluteCenterProps> = (props) => {
   const { className, axis, ...remainingProps } = props;
 
-  return <uix.div className={cn(centerVariants({ axis, className }), "")} {...remainingProps} />;
+  return <uix.div className={cn(centerVariants({ axis, className }))} {...remainingProps} />;
 };
 
 AbsoluteCenter.displayName = "AbsoluteCenter";

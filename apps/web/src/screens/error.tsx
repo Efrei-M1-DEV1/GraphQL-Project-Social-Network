@@ -7,10 +7,11 @@ import type { ErrorResponse } from "react-router";
 
 type ErrorBoundaryProps = {
   error?: ErrorResponse & { error: Error };
+  reset?: () => void;
 };
 
 export default function ErrorBoundary(props: ErrorBoundaryProps) {
-  const { error } = props;
+  const { error, reset } = props;
 
   // Extract values safely, providing defaults
   const errorMessage = error?.error?.message || "An unexpected error occurred.";
@@ -40,13 +41,13 @@ export default function ErrorBoundary(props: ErrorBoundaryProps) {
                   </p>
                 ) : null}
                 {errorStack ? (
-                  <pre className="mt-4 overflow-x-auto">
+                  <pre className="mt-4 overflow-x-auto rounded bg-[var(--colors-subtle)] p-4">
                     <code>{errorStack}</code>
                   </pre>
                 ) : null}
               </CardBody>
             </Card>
-            <Button className="mx-auto mt-6" onClick={() => window.location.reload()}>
+            <Button className="mx-auto mt-6" onClick={reset}>
               Refresh Page
             </Button>
           </CardBody>
