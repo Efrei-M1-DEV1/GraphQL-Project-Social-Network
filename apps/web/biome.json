@@ -2,6 +2,6 @@
   "extends": ["../../biome.json"],
   "files": {
     "include": ["src/**/*.ts", "src/**/*.tsx"],
-    "ignore": ["src/**/*.d.ts"]
+    "ignore": ["src/**/*.d.ts", "src/gql/**/*.ts"]
   }
 }

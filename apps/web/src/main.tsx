@@ -18,8 +18,12 @@ if (!root) {
   );
 }
 
+if (!import.meta.env.VITE_GRAPHQL_ENDPOINT) {
+  throw new Error("VITE_GRAPHQL_ENDPOINT is not defined, please set it in your .env file");
+}
+
 const client = new ApolloClient({
-  uri: "http://localhost:4000",
+  uri: import.meta.env.VITE_GRAPHQL_ENDPOINT,
   cache: new InMemoryCache(),
 });
 
