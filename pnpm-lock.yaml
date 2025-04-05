@@ -96,6 +96,9 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      graphql:
+        specifier: ^16.10.0
+        version: 16.10.0
       next-themes:
         specifier: ^0.4.4
         version: 0.4.6(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -115,6 +118,9 @@ importers:
         specifier: ^0.2.13
         version: 0.2.14(@types/react@19.0.12)(react-dom@19.0.0(react@19.0.0))(react-router@7.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0))(react@19.0.0)(rollup@4.36.0)
     devDependencies:
+      '@graphql-codegen/cli':
+        specifier: ^5.0.5
+        version: 5.0.5(@types/node@22.13.11)(graphql@16.10.0)(typescript@5.8.2)
       '@repo/tailwind-config':
         specifier: workspace:*
         version: link:../../packages/tailwind-config
