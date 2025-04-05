@@ -1,8 +1,15 @@
-import ErrorBoundary from "@/screens/error";
-import RootLayout from "@/screens/layout";
-import Home from "@/screens/page";
-import { type ErrorResponse, Outlet, createBrowserRouter, isRouteErrorResponse, useRouteError } from "react-router";
-import { useParams, useSearchParams } from "react-router";
+import ErrorComponent from "@/screens/error";
+import { handleApolloError } from "@/utils/error";
+import { ApolloError } from "@apollo/client";
+import {
+  type ErrorResponse,
+  Outlet,
+  createBrowserRouter,
+  isRouteErrorResponse,
+  useParams,
+  useRouteError,
+  useSearchParams,
+} from "react-router";
 
 function LayoutWrapper<P extends object>(Component: React.ComponentType<P>): React.FC<P> {
   return function Layout(props: P): React.ReactElement {
@@ -32,11 +39,18 @@ function PageWrapper<P extends {}>(Component: React.ComponentType<P>): React.FC<
 
 function ErrorWrapper<P extends {}>(Component: React.ComponentType<P>): React.FC<P> {
   return function ErrorBoundary(props: P): React.ReactElement {
-    const error = useRouteError() as ErrorResponse | Error;
+    const error = useRouteError() as ErrorResponse | ApolloError | Error;
 
     const errorObj: Partial<ErrorResponse> = {};
 
-    if (isRouteErrorResponse(error)) {
+    if (error instanceof ApolloError) {
+      const apolloError = handleApolloError(error);
+      const err = new Error(apolloError.data?.message);
+      err.name = apolloError.data?.name || "Error";
+      Object.assign(errorObj, apolloError, {
+        error: err,
+      });
+    } else if (isRouteErrorResponse(error)) {
       Object.assign(errorObj, error);
     } else if (error instanceof Error) {
       Object.assign(errorObj, {
@@ -46,23 +60,34 @@ function ErrorWrapper<P extends {}>(Component: React.ComponentType<P>): React.FC
       });
     }
 
-    return <Component error={errorObj} {...props} />;
+    const reset = () => {
+      window.location.reload();
+    };
+
+    return <Component error={errorObj} reset={reset} {...props} />;
   };
 }
 
 export const router = createBrowserRouter([
   {
     path: "",
-    Component: LayoutWrapper(RootLayout),
-    ErrorBoundary: ErrorWrapper(ErrorBoundary),
+    lazy: async () => ({
+      Component: LayoutWrapper((await import("./screens/layout")).default),
+    }),
+    HydrateFallback: () => null,
+    ErrorBoundary: ErrorWrapper(ErrorComponent),
     children: [
       {
-        children: [
-          {
-            path: "/",
-            Component: PageWrapper(Home),
-          },
-        ],
+        path: "",
+        lazy: async () => ({
+          Component: PageWrapper((await import("./screens/page")).default),
+        }),
+      },
+      {
+        path: "*",
+        lazy: async () => ({
+          Component: PageWrapper((await import("./components/not-found")).default),
+        }),
       },
     ],
   },
