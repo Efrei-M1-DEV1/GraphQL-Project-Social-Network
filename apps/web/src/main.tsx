@@ -1,10 +1,8 @@
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Provider as ReduxProvider } from "react-redux";
 import { RouterProvider } from "react-router"; // ensure using react-router-dom 6.4+
 import { scan } from "react-scan"; // must be imported before React and React DOM
-import { store } from "./app/store";
 import { ThemeProvider } from "./providers/theme";
 import { router } from "./routes";
 import "./styles/globals.css";
@@ -27,12 +25,10 @@ const client = new ApolloClient({
 
 createRoot(root).render(
   <StrictMode>
-    <ReduxProvider store={store}>
-      <ApolloProvider client={client}>
-        <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <RouterProvider router={router} />
-        </ThemeProvider>
-      </ApolloProvider>
-    </ReduxProvider>
+    <ApolloProvider client={client}>
+      <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem disableTransitionOnChange>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </ApolloProvider>
   </StrictMode>,
 );
