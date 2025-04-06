@@ -96,6 +96,9 @@ importers:
       '@repo/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@repo/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       next-themes:
         specifier: ^0.4.4
         version: 0.4.6(react-dom@19.1.0)(react@19.1.0)
