@@ -1,4 +1,4 @@
-import { Card, CardBody, CardDescription, CardHeader } from "@repo/ui/data-display/card";
+import { Card, CardBody, CardDescription, CardTitle } from "@repo/ui/data-display/card";
 import { Button } from "@repo/ui/form/button";
 import { Link } from "@repo/ui/navigation/link";
 import { Heading } from "@repo/ui/typography/heading";
@@ -15,7 +15,7 @@ export default function ArticleList() {
       <Heading>ArticleList</Heading>
       {articles.map((article) => (
         <Card key={article.id}>
-          <CardHeader>{article.title}</CardHeader>
+          <CardTitle>{article.title}</CardTitle>
           <CardBody>
             <CardDescription>{article.description}</CardDescription>
           </CardBody>
