@@ -1,29 +1,11 @@
-import { type VariantProps, cn, cva } from "@repo/utils/classes";
+import { cn } from "@repo/utils/classes";
 import { Children, cloneElement } from "react";
 import { type UixComponent, uix } from "../factory";
 
 /**
- * The Stack component variants.
- */
-const stackVariants = cva("flex gap-2", {
-  variants: {
-    /**
-     * Use the direction prop to change the direction of the stack.
-     */
-    direction: {
-      horizontal: "flex-row",
-      vertical: "flex-col",
-    },
-  },
-  defaultVariants: {
-    direction: "vertical",
-  },
-});
-
-/**
  * The Stack component props.
  */
-type StackProps = VariantProps<typeof stackVariants> & {
+type StackProps = {
   /**
    * Use the separator prop to add a separator between the stack items.
    */
@@ -40,11 +22,11 @@ type StackProps = VariantProps<typeof stackVariants> & {
  *
  * -----------------------------------------------------------------------------*/
 export const Stack: UixComponent<"div", StackProps> = (props) => {
-  const { children, className, direction, separator, ...remainingProps } = props;
+  const { children, className, separator, ...remainingProps } = props;
 
   const content = Children.toArray(children).reduce((acc: React.ReactNode[], child, index) => {
     if (index > 0 && separator) {
-      const key = `separator-${index}`;
+      const key = `stack-separator-${index}`;
       acc.push(cloneElement(separator, { key }));
     }
     acc.push(child);
@@ -52,7 +34,7 @@ export const Stack: UixComponent<"div", StackProps> = (props) => {
   }, []);
 
   return (
-    <uix.div className={cn(stackVariants({ direction, className }))} {...remainingProps}>
+    <uix.div className={cn("flex flex-col gap-2", className)} {...remainingProps}>
       {content}
     </uix.div>
   );
