@@ -13,14 +13,14 @@ export default function Login() {
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email");
     const password = formData.get("password");
-    // console.log("Form submitted:", { email, password });
+    
     // Validation of inputs:
     const parseData = loginSchema.safeParse({
       email,
       password,
     });
     if (!parseData.success) {
-      // console.log("Validation failed:", parseData.error.format());
+      
       // Handle validation errors
       // You can display error messages to the user or take other actions
       const formattedErrors: Record<string, string> = {};
@@ -33,7 +33,7 @@ export default function Login() {
       return;
     }
     // If validation is successful, you can proceed with your logic
-    // console.log("Form submitted:", parseData.data);
+    
     setErrors({});
   }
 
