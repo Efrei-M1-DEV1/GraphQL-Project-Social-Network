@@ -39,7 +39,7 @@ export default function NotFound() {
 
   return (
     <div className="flex h-screen items-center justify-center">
-      <Card className="w-full max-w-xl border-0 bg-gray-white shadow-md dark:bg-gray-950">
+      <Card className="w-full max-w-xl border-0 bg-white shadow-md dark:bg-gray-950">
         <CardBody className="gap-4 text-center">
           <Icon as={BiErrorCircle} className={cn("mx-auto h-16 w-16 text-red-500", isShaking && "animate-shake")} />
           <CardTitle className="font-extrabold text-4xl text-gray-900 tracking-tight dark:text-white">Lost in Space?</CardTitle>
