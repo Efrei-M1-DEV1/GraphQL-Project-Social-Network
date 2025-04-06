@@ -1,18 +1,18 @@
+import { Card, CardBody, CardFooter, CardTitle } from "@repo/ui/data-display/card";
 import { Button } from "@repo/ui/form/button";
-import { Container } from "@repo/ui/layout/container";
 import { Icon } from "@repo/ui/media/icon";
-import { Heading } from "@repo/ui/typography/heading";
+import { cn } from "@repo/utils/classes";
 import { useEffect, useState } from "react";
 import { BiErrorCircle } from "react-icons/bi";
 import { useNavigate } from "react-router";
 
 export default function NotFound() {
   const navigate = useNavigate();
-  const [countdown, setCountdown] = useState(20);
+  const [countdown, setCountdown] = useState(10);
   const [isShaking, setIsShaking] = useState(false);
 
   useEffect(() => {
-    let timer: number;
+    let timer: NodeJS.Timeout;
     if (countdown > 0) {
       timer = setTimeout(() => {
         setCountdown(countdown - 1);
@@ -20,7 +20,9 @@ export default function NotFound() {
     } else {
       navigate("/");
     }
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+    };
   }, [countdown, navigate]);
 
   const goHome = () => {
@@ -36,25 +38,27 @@ export default function NotFound() {
   };
 
   return (
-    <Container className="flex h-screen items-center justify-center bg-gradient-to-br from-gray-100 to-blue-50">
-      <div className="rounded-2xl bg-white p-8 text-center shadow-xl">
-        <Icon as={BiErrorCircle} className={`mx-auto h-16 w-16 text-red-500 ${isShaking ? "animate-shake" : ""}`} />
-        <Heading className="mt-4 font-extrabold text-4xl text-gray-900 tracking-tight">Lost in Space?</Heading>
-        <div className="mt-3 text-gray-500 text-lg">
-          It seems like you've stumbled upon a black hole. This page doesn't exist!
-        </div>
-        <div className="mt-8 flex flex-col items-center space-y-3 sm:flex-row sm:justify-center sm:space-x-4 sm:space-y-0">
-          <Button onClick={goHome} variant="solid" className="hover:scale-105">
-            Warp Back Home
-          </Button>
-          <Button onClick={goBack} variant="outline">
-            Try to Re-trace Steps
-          </Button>
-        </div>
-        <div className="mt-6 text-gray-500 text-sm">
-          Auto-navigating to safety in <span className="font-semibold">{countdown}</span> seconds...
-        </div>
-      </div>
-    </Container>
+    <div className="flex h-screen items-center justify-center">
+      <Card className="w-full max-w-xl border-0 bg-white shadow-md dark:bg-gray-950">
+        <CardBody className="gap-4 text-center">
+          <Icon as={BiErrorCircle} className={cn("mx-auto h-16 w-16 text-red-500", isShaking && "animate-shake")} />
+          <CardTitle className="font-extrabold text-4xl text-gray-900 tracking-tight dark:text-white">Lost in Space?</CardTitle>
+          <p className="text-lg opacity-60">It seems like you've stumbled upon a black hole. This page doesn't exist!</p>
+        </CardBody>
+        <CardFooter className="flex-col gap-3">
+          <div className="flex flex-col items-center gap-y-3 sm:flex-row sm:justify-center sm:gap-x-4 sm:gap-y-0">
+            <Button onClick={goHome} variant="solid" className="bg-gray-950 hover:scale-105 dark:bg-gray-50">
+              Warp Back Home
+            </Button>
+            <Button onClick={goBack} variant="outline" className="text-gray-950 dark:text-gray-50">
+              Try to Re-trace Steps
+            </Button>
+          </div>
+          <p className="text-sm opacity-60">
+            Auto-navigating to safety in <span className="font-semibold">{countdown}</span> seconds...
+          </p>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
