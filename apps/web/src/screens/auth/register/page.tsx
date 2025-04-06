@@ -14,7 +14,7 @@ export default function Register() {
     const name = formData.get("name");
     const email = formData.get("email");
     const password = formData.get("password");
-    // console.log("Form submitted:", { name, email, password });
+    
     // Validation of inputs:
     const parseData = registerSchema.safeParse({
       name,
