@@ -1,3 +1,5 @@
+import { Container } from "@repo/ui/layout/container";
+
 type RootLayoutProps = {
   children?: React.ReactNode;
 };
@@ -5,5 +7,5 @@ type RootLayoutProps = {
 export default function RootLayout(props: RootLayoutProps) {
   const { children } = props;
 
-  return children;
+  return <Container className="max-w-screen-md duration-moderate">{children}</Container>;
 }
