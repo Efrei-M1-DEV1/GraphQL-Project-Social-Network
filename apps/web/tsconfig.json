@@ -1,6 +1,6 @@
 {
   "extends": ["@repo/typescript-config/vite.json", "@repo/typescript-config/react-library.json"],
-  "include": ["src", "tailwind.config.ts", "vite-env.d.ts", "codegen.ts"],
+  "include": ["src", "tailwind.config.ts", "codegen.ts"],
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
