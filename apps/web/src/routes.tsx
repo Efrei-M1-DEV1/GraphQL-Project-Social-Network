@@ -84,6 +84,29 @@ export const router = createBrowserRouter([
         }),
       },
       {
+        path: "auth",
+        children: [
+          {
+            path: "",
+            lazy: async () => ({
+              Component: PageWrapper((await import("./components/not-found")).default),
+            }),
+          },
+          {
+            path: "login",
+            lazy: async () => ({
+              Component: PageWrapper((await import("./screens/auth/login/page")).default),
+            }),
+          },
+          {
+            path: "register",
+            lazy: async () => ({
+              Component: PageWrapper((await import("./screens/auth/register/page")).default),
+            }),
+          },
+        ],
+      },
+      {
         path: "*",
         lazy: async () => ({
           Component: PageWrapper((await import("./components/not-found")).default),
