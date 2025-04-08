@@ -46,7 +46,7 @@
     --colors-success: theme("colors.green.400");
     --colors-info: theme("colors.blue.400");
     --colors-shadow-1: color-mix(in srgb, theme("colors.black") 64%, transparent);
-    --colors-shadow-2: inset color-mix(in srgb, theme("colors.gray.300") 20%, transparent);
+    --colors-shadow-2: inset color-mix(in srgb, theme("colors.gray.300") 30%, transparent);
   }
 
   :root {

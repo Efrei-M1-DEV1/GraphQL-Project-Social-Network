@@ -24,7 +24,7 @@ export const CardBody: UixComponent<"div"> = (props) => {
     </uix.div>
   );
 };
-Card.displayName = "Card";
+CardBody.displayName = "CardBody";
 
 export const CardHeader: UixComponent<"div"> = (props) => {
   const { children, className, ...remainingProps } = props;
@@ -35,7 +35,7 @@ export const CardHeader: UixComponent<"div"> = (props) => {
     </uix.div>
   );
 };
-Card.displayName = "CardHeader";
+CardHeader.displayName = "CardHeader";
 
 export const CardFooter: UixComponent<"div"> = (props) => {
   const { children, className, ...remainingProps } = props;
@@ -46,18 +46,18 @@ export const CardFooter: UixComponent<"div"> = (props) => {
     </uix.div>
   );
 };
-Card.displayName = "CardFooter";
+CardFooter.displayName = "CardFooter";
 
 export const CardTitle: UixComponent<"h3"> = (props) => {
   const { className, ...remainingProps } = props;
 
   return <uix.h3 className={cn("font-semibold text-lg leading-7", className)} {...remainingProps} />;
 };
-Card.displayName = "CardTitle";
+CardTitle.displayName = "CardTitle";
 
 export const CardDescription: UixComponent<"p"> = (props) => {
   const { className, ...remainingProps } = props;
 
   return <uix.p className={cn("text-sm", className)} {...remainingProps} />;
 };
-Card.displayName = "CardDescription";
+CardDescription.displayName = "CardDescription";
