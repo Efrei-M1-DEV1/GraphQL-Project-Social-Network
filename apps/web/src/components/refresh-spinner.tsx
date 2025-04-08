@@ -12,9 +12,5 @@ type RefreshSpinnerProps = {
 export function RefreshSpinner(props: RefreshSpinnerProps) {
   const { className } = props;
 
-  return (
-    <div className="flex items-center justify-center">
-      <Icon as={LuRefreshCcw} className={cn("!duration-slowest rotate-180 animate-spin", className)} />
-    </div>
-  );
+  return <Icon as={LuRefreshCcw} className={cn("!duration-slowest rotate-180 animate-spin", className)} />;
 }
