@@ -16,10 +16,21 @@ export const typeDefs = `#graphql
     updatedAt: String!
   }
 
+  type Comment{
+  id:Int!
+  content: String!
+  author: User!    
+  article:  Article!
+  createdAt: String!
+  updatedAt: String! 
+}
+  
+
   type AuthPayload {
     token: String!
     user: User!
   }
+
 
   type Query {
     hello: String
@@ -35,5 +46,6 @@ export const typeDefs = `#graphql
     deleteArticle(id: Int!): Boolean!
     register(email: String!, password: String!, name: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
+    createComment(content: String!, articleId: Int!): Comment!
   }
 `;

@@ -130,7 +130,9 @@ export const resolvers: Resolvers = {
       if (!context.user) {
         throw new Error("Unauthorized: Please log in");
       }
-      const article = await context.dataSources.db.article.findUnique({ where: { id } });
+      const article = await context.dataSources.db.article.findUnique({
+        where: { id },
+      });
       if (!article) {
         throw new Error("Article not found");
       }
@@ -160,7 +162,9 @@ export const resolvers: Resolvers = {
       if (!context.user) {
         throw new Error("Unauthorized: Please log in");
       }
-      const article = await context.dataSources.db.article.findUnique({ where: { id } });
+      const article = await context.dataSources.db.article.findUnique({
+        where: { id },
+      });
       if (!article) {
         throw new Error("Article not found");
       }
@@ -169,6 +173,43 @@ export const resolvers: Resolvers = {
       }
       await context.dataSources.db.article.delete({ where: { id } });
       return true;
+    },
+    createComment: async (_parent, { content, articleId }, context: DataSourceContext) => {
+      await simulateDelay();
+
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+      const comment = await context.dataSources.db.comment.create({
+        data: {
+          content,
+          articleId,
+          authorId: context.user.id,
+        },
+        include: { article: true, author: true },
+      });
+
+      return {
+        ...comment,
+        createdAt: comment.createdAt.toISOString(),
+        updatedAt: comment.updatedAt.toISOString(),
+        article: {
+          ...comment.article,
+          author: {
+            ...comment.author,
+            createdAt: comment.author.createdAt.toISOString(),
+            updatedAt: comment.author.updatedAt.toISOString(),
+          },
+          createdAt: comment.article.createdAt.toISOString(),
+          updatedAt: comment.article.updatedAt.toISOString(),
+        },
+
+        author: {
+          ...comment.author,
+          createdAt: comment.author.createdAt.toISOString(),
+          updatedAt: comment.author.updatedAt.toISOString(),
+        },
+      };
     },
     register: async (_parent, args, context: DataSourceContext) => {
       // Simulate a delay for demonstration purposes
@@ -180,7 +221,9 @@ export const resolvers: Resolvers = {
       }
       const { email, password, name } = parsed.data;
 
-      const existingUser = await context.dataSources.db.user.findUnique({ where: { email } });
+      const existingUser = await context.dataSources.db.user.findUnique({
+        where: { email },
+      });
       if (existingUser) {
         throw new Error("User with this email already exists");
       }
@@ -209,7 +252,9 @@ export const resolvers: Resolvers = {
       }
       const { email, password } = parsed.data;
 
-      const user = await context.dataSources.db.user.findUnique({ where: { email } });
+      const user = await context.dataSources.db.user.findUnique({
+        where: { email },
+      });
       if (!user || !(await bcrypt.compare(password, user.password))) {
         throw new Error("Invalid email or password");
       }
