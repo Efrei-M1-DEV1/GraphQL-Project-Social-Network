@@ -22,10 +22,11 @@ const inputVariants = cva("", {
      */
     variant: {
       flushed:
-        "rounded-none border-b bg-transparent px-0 focus-visible:border-transparent focus-visible:shadow-[0_2px_0_0_var(--colors-focus-ring)] focus-visible:outline-transparent",
+        "rounded-none border-b bg-transparent px-0 focus-visible:border-transparent focus-visible:shadow-[0_2px_0_0_var(--colors-focus-ring)] focus-visible:outline-transparent aria-[invalid=true]:border-[var(--colors-error)] aria-[invalid=true]:shadow-[var(--colors-error)]",
       outline:
-        "border bg-transparent focus-visible:border-transparent aria-[invalid=true]:outline-[var(--colors-error)] aria-[invalid=true]:border-[var(--colors-error)]",
-      subtle: "bg-[var(--colors-subtle)] aria-[invalid=true]:border",
+        "border bg-transparent focus-visible:border-transparent aria-[invalid=true]:border-[var(--colors-error)] aria-[invalid=true]:outline-[var(--colors-error)]",
+      subtle:
+        "bg-[var(--colors-subtle)] aria-[invalid=true]:border aria-[invalid=true]:border-[var(--colors-error)] aria-[invalid=true]:outline-[var(--colors-error)]",
       plain: "",
     },
   },
