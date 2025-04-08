@@ -100,8 +100,8 @@ export const Field: UixComponent<"fieldset", FieldProps> = (props) => {
           data-part="label"
           data-readonly={readOnly ? "" : undefined}
           data-scope={DATA_SCOPE}
-          htmlFor={ids.input} // Set initial values
-          id={ids.label} // Set initial values
+          htmlFor={ids.input}
+          id={ids.label}
         >
           {label}
           {optionalText}

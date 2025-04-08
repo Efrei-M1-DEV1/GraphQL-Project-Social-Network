@@ -84,6 +84,35 @@ export const router = createBrowserRouter([
         }),
       },
       {
+        path: "auth/login",
+        lazy: async () => ({
+          Component: PageWrapper((await import("./screens/auth/login/page")).default),
+        }),
+      },
+      {
+        path: "auth/register",
+        lazy: async () => ({
+          Component: PageWrapper((await import("./screens/auth/register/page")).default),
+        }),
+      },
+      {
+        path: "articles",
+        children: [
+          {
+            path: "",
+            lazy: async () => ({
+              Component: PageWrapper((await import("./screens/articles/page")).default),
+            }),
+          },
+          {
+            path: ":id",
+            lazy: async () => ({
+              Component: PageWrapper((await import("./screens/articles/[id]/page")).default),
+            }),
+          },
+        ],
+      },
+      {
         path: "*",
         lazy: async () => ({
           Component: PageWrapper((await import("./components/not-found")).default),
