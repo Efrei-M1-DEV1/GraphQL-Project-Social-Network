@@ -180,6 +180,15 @@ export const resolvers: Resolvers = {
       if (!context.user) {
         throw new Error("Unauthorized: Please log in");
       }
+
+      const article = await context.dataSources.db.article.findUnique({
+        where: { id: articleId },
+      });
+
+      if (!article) {
+        throw new Error("Article not found");
+      }
+
       const comment = await context.dataSources.db.comment.create({
         data: {
           content,
