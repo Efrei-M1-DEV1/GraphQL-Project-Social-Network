@@ -1,6 +1,6 @@
 # Social Network Platform
 
-This is a social network web application where users can register, post articles, comment on others' posts, and like articles. It’s built using modern technologies like React, GraphQL, and Prisma, and is currently under active development.
+This is a social network web application where users can register, post articles, comment on others' posts, and like articles. It's built using modern technologies like React, GraphQL, and Prisma, and is currently under active development.
 
 ## Features
 
@@ -65,11 +65,11 @@ Follow these steps to set up the project locally:
      pnpm install
      ```
 
-     > **\*Note:** This project uses `pnpm` as the package manager, as specified in `pnpm-workspace.yaml`.\*
+     > ***Important:** This project uses `pnpm` as the package manager, as specified in `pnpm-workspace.yaml`.*
 
 ---
 
-3. **Set up the database:**
+3. **Set up the database and environment variables:**
 
 #### ✅ For macOS/Linux (bash/zsh)
 
@@ -81,6 +81,12 @@ Follow these steps to set up the project locally:
   echo "JWT_SECRET=$(openssl rand -base64 32)" >> apps/server/.env
   ```
 
+- Create a `.env` file in `apps/web/` with:
+  ```bash
+  echo "VITE_GRAPHQL_ENDPOINT=http://localhost:4000" >> apps/web/.env
+  # Important: If you changed the PORT in apps/server/.env, update the port number here to match
+  ```
+
 - Run Prisma migrations to initialize the SQLite database:
   ```bash
   cd apps/server
@@ -89,12 +95,18 @@ Follow these steps to set up the project locally:
 
 #### ✅ For Windows (PowerShell)
 
-- Create the `.env` file and set environment variables:
+- Create the server `.env` file and set environment variables:
   ```powershell
   "NODE_ENV=development" | Out-File -FilePath apps/server/.env -Encoding utf8
   "PORT=4000" | Out-File -Append -FilePath apps/server/.env -Encoding utf8 # Change this if needed
   "DATABASE_URL=file:./prisma/dev.db" | Out-File -Append -FilePath apps/server/.env -Encoding utf8
   "JWT_SECRET=$([convert]::ToBase64String((1..32 | ForEach-Object {Get-Random -Minimum 0 -Maximum 256})))" | Out-File -Append -FilePath apps/server/.env -Encoding utf8
+  ```
+
+- Create the web `.env` file:
+  ```powershell
+  "VITE_GRAPHQL_ENDPOINT=http://localhost:4000" | Out-File -FilePath apps/web/.env -Encoding utf8
+  # Important: If you changed the PORT in apps/server/.env, update the port number here to match
   ```
 
 #### ✅ Manual Method
@@ -108,6 +120,13 @@ Follow these steps to set up the project locally:
    JWT_SECRET=your-secret-key-here
    ```
    (Replace `"your-secret-key-here"` with a manually generated key or an online generator.)
+
+3. Create a `.env` file inside `apps/web/`.
+4. Add the following line using a text editor:
+   ```bash
+   VITE_GRAPHQL_ENDPOINT=http://localhost:4000
+   ```
+   > ***Important:** The port in `VITE_GRAPHQL_ENDPOINT` must match the PORT you specified in the server's .env file.*
 
 - Then, run the Prisma migration:
   ```powershell
@@ -186,7 +205,3 @@ Developed by the Efrei M1 DEV1 team as a GraphQL learning project.
 ## Contact
 
 For questions or feedback, please open an issue or reach out at [georgy.guei@efrei.net](mailto:georgy.guei@efrei.net).
-
-```
-
-```
