@@ -1,5 +1,6 @@
 import { Button } from "@repo/ui/form/button";
 import { Field } from "@repo/ui/form/field";
+import { Input } from "@repo/ui/form/input";
 import { Link } from "@repo/ui/navigation/link";
 import { Heading } from "@repo/ui/typography/heading";
 import { loginSchema } from "@repo/utils/schemas/auth";
@@ -13,14 +14,13 @@ export default function Login() {
     const formData = new FormData(event.currentTarget);
     const email = formData.get("email");
     const password = formData.get("password");
-    
+
     // Validation of inputs:
     const parseData = loginSchema.safeParse({
       email,
       password,
     });
     if (!parseData.success) {
-      
       // Handle validation errors
       // You can display error messages to the user or take other actions
       const formattedErrors: Record<string, string> = {};
@@ -33,7 +33,7 @@ export default function Login() {
       return;
     }
     // If validation is successful, you can proceed with your logic
-    
+
     setErrors({});
   }
 
@@ -41,10 +41,10 @@ export default function Login() {
     <form className="mx-auto grid max-w-screen-sm gap-4 sm:grid-cols-2 " onSubmit={submitForm}>
       <Heading className="sm:col-span-2">Login</Heading>
       <Field label="Email" helperText="Enter your email" invalid={!!errors.email} errorText={errors.email} required>
-        <input type="text" name="email" />
+        <Input type="text" name="email" />
       </Field>
       <Field label="Password" errorText={errors.password} invalid={!!errors.password} helperText="Enter your password" required>
-        <input type="password" name="password" />
+        <Input type="password" name="password" />
       </Field>
 
       <Button type="submit" className="bg-purple-600 sm:col-span-2">

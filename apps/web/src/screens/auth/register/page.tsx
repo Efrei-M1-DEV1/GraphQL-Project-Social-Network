@@ -1,5 +1,6 @@
 import { Button } from "@repo/ui/form/button";
 import { Field } from "@repo/ui/form/field";
+import { Input } from "@repo/ui/form/input";
 import { Link } from "@repo/ui/navigation/link";
 import { Heading } from "@repo/ui/typography/heading";
 import { registerSchema } from "@repo/utils/schemas/auth";
@@ -14,7 +15,7 @@ export default function Register() {
     const name = formData.get("name");
     const email = formData.get("email");
     const password = formData.get("password");
-    
+
     // Validation of inputs:
     const parseData = registerSchema.safeParse({
       name,
@@ -40,13 +41,13 @@ export default function Register() {
     <form className="mx-auto grid max-w-screen-sm gap-4 sm:grid-cols-2 " onSubmit={submitForm}>
       <Heading className="sm:col-span-2">Register</Heading>
       <Field label="Name" helperText="Enter your name" errorText={errors.name} invalid={!!errors.name} required>
-        <input type="text" name="name" />
+        <Input type="text" name="name" />
       </Field>
       <Field label="Email" helperText="Enter your email" errorText={errors.email} invalid={!!errors.email} required>
-        <input type="text" name="email" />
+        <Input type="text" name="email" />
       </Field>
       <Field label="Password" helperText="Enter your password" errorText={errors.password} invalid={!!errors.password} required>
-        <input type="password" name="password" />
+        <Input type="password" name="password" />
       </Field>
 
       <Button type="submit" className="bg-purple-600 sm:col-span-2">
