@@ -1,69 +1,68 @@
+import { Link } from "@/components/link";
+import { RefreshSpinner } from "@/components/refresh-spinner";
 import { graphql } from "@/gql";
-import type { GetArticlesQuery } from "@/gql/graphql";
-import { useQuery } from "@apollo/client";
-import { Card, CardBody, CardFooter, CardTitle } from "@repo/ui/data-display/card";
+import type { ArticlesQuery } from "@/gql/graphql";
+import { useSuspenseQuery } from "@apollo/client";
+import { Card, CardBody, CardFooter, CardHeader, CardTitle } from "@repo/ui/data-display/card";
 import { Button } from "@repo/ui/form/button";
-// import { Link } from "@repo/ui/navigation/link";
 
 import { Heading } from "@repo/ui/typography/heading";
-import { Link } from "react-router";
+import { Suspense } from "react";
 
 const GET_ARTICLES = graphql(`
-  query GetArticles($first: Int, $after: Int) {
+  query Articles($first: Int, $after: Int) {
     articles(first: $first, after: $after) {
-      id
+      id,
       title
       content
-      createdAt
-      author {
-        id
-        name
-      }
     }
   }
 `);
 
-export default function ArticleList() {
-  const { loading, error, data } = useQuery<GetArticlesQuery>(GET_ARTICLES, {
+export default function ArticlesPage() {
+  return (
+    <div className="space-y-2">
+      <Heading>Articles</Heading>
+      <p>List of articles will be displayed here.</p>
+      <Suspense fallback={<RefreshSpinner />}>
+        <ArticleList />
+      </Suspense>
+    </div>
+  );
+}
+
+export function ArticleList() {
+  const { data, error } = useSuspenseQuery<ArticlesQuery>(GET_ARTICLES, {
+    errorPolicy: "all",
     variables: {
       first: 10,
       after: 0,
     },
   });
 
-  // Afficher un message de chargement le tps que les données chargent
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  // Afficher un message d'erreur si une erreur se produit
   if (error) {
-    return <p>Error: {error.message}</p>;
+    return <p>Error loading articles: {error.message}</p>;
   }
 
-  if (!data || !data.articles) {
+  if (!data?.articles || data.articles.length === 0) {
     return <p>No articles found.</p>;
   }
-  // Afficher les articles
-
-  // const articles = [
-  //   { id: 1, title: "Article 1", description: "Description of Article 1" },
-  //   { id: 2, title: "Article 2", description: "Description of Article 2" },
-  //   { id: 3, title: "Article 3", description: "Description of Article 3" },
-  // ];
 
   return (
-    <div className="mx-auto max-w-screen-md space-y-6">
-      <Heading>ArticleList</Heading>
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {data.articles.map((article) => (
         <Card key={article.id}>
-          <CardTitle>{article.title}</CardTitle>
+          <CardHeader>
+            <CardTitle>{article.title}</CardTitle>
+          </CardHeader>
           <CardBody>
-            <p>{article.content}</p>
+            <p className="line-clamp-1">{article.content}</p>
           </CardBody>
-          <CardFooter className="flex justify-end ">
-            <Button asChild>
-              <Link to={`/articles/${article.id}`}>Read More</Link>
+          <CardFooter className="flex justify-end">
+            <Button className="bg-gray-900 dark:bg-gray-50" asChild>
+              <Link to={`/articles/${article.id}`} className="hover:no-underline">
+                Read More
+              </Link>
             </Button>
           </CardFooter>
         </Card>
