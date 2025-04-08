@@ -36,7 +36,14 @@ export const resolvers: Resolvers = {
 
       const article = await context.dataSources.db.article.findUnique({
         where: { id },
-        include: { author: true },
+        include: {
+          author: true,
+          comments: {
+            include: {
+              author: true,
+            },
+          },
+        },
       });
       if (!article) {
         return null;
@@ -50,6 +57,21 @@ export const resolvers: Resolvers = {
           createdAt: article.author.createdAt.toISOString(),
           updatedAt: article.author.updatedAt.toISOString(),
         },
+        comments: article.comments.map((comment) => ({
+          ...comment,
+          createdAt: comment.createdAt.toISOString(),
+          updatedAt: comment.updatedAt.toISOString(),
+          // article: {
+          //   ...comment.article,
+          //   createdAt: comment.article.createdAt.toISOString(),
+          //   updatedAt: comment.article.updatedAt.toISOString(),
+          // },
+          author: {
+            ...comment.author,
+            createdAt: comment.author.createdAt.toISOString(),
+            updatedAt: comment.author.updatedAt.toISOString(),
+          },
+        })),
       };
     },
     articles: async (_parent, { first, after }, context: DataSourceContext) => {
@@ -60,8 +82,14 @@ export const resolvers: Resolvers = {
         take: first || 10,
         skip: after || 0,
         orderBy: { createdAt: "desc" },
-        include: { author: true },
+        include: {
+          author: true,
+          comments: {
+            include: { author: true },
+          },
+        },
       });
+
       return articles.map((article) => ({
         ...article,
         createdAt: article.createdAt.toISOString(),
@@ -71,6 +99,16 @@ export const resolvers: Resolvers = {
           createdAt: article.author.createdAt.toISOString(),
           updatedAt: article.author.updatedAt.toISOString(),
         },
+        comments: article.comments.map((comment) => ({
+          ...comment,
+          createdAt: comment.createdAt.toISOString(),
+          updatedAt: comment.updatedAt.toISOString(),
+          author: {
+            ...comment.author,
+            createdAt: comment.author.createdAt.toISOString(),
+            updatedAt: comment.author.updatedAt.toISOString(),
+          },
+        })),
       }));
     },
     articlesByAuthor: async (_parent, { authorId, first, after }, context: DataSourceContext) => {
@@ -82,7 +120,7 @@ export const resolvers: Resolvers = {
         take: first || 10,
         skip: after || 0,
         orderBy: { createdAt: "desc" },
-        include: { author: true },
+        include: { author: true, comments: { include: { author: true } } },
       });
       return articles.map((article) => ({
         ...article,
@@ -93,6 +131,16 @@ export const resolvers: Resolvers = {
           createdAt: article.author.createdAt.toISOString(),
           updatedAt: article.author.updatedAt.toISOString(),
         },
+        comments: article.comments.map((comment) => ({
+          ...comment,
+          createdAt: comment.createdAt.toISOString(),
+          updatedAt: comment.updatedAt.toISOString(),
+          author: {
+            ...comment.author,
+            createdAt: comment.author.createdAt.toISOString(),
+            updatedAt: comment.author.updatedAt.toISOString(),
+          },
+        })),
       }));
     },
   },
@@ -121,6 +169,7 @@ export const resolvers: Resolvers = {
           createdAt: article.author.createdAt.toISOString(),
           updatedAt: article.author.updatedAt.toISOString(),
         },
+        comments: [],
       };
     },
     updateArticle: async (_parent, { id, title, content }, context: DataSourceContext) => {
@@ -139,11 +188,18 @@ export const resolvers: Resolvers = {
       if (article.authorId !== context.user.id) {
         throw new Error("Forbidden: You can only update your own articles");
       }
+
       const updatedArticle = await context.dataSources.db.article.update({
         where: { id },
         data: { title: title ?? undefined, content: content ?? undefined },
-        include: { author: true },
+        include: {
+          author: true,
+          comments: {
+            include: { author: true },
+          },
+        },
       });
+
       return {
         ...updatedArticle,
         createdAt: updatedArticle.createdAt.toISOString(),
@@ -153,6 +209,16 @@ export const resolvers: Resolvers = {
           createdAt: updatedArticle.author.createdAt.toISOString(),
           updatedAt: updatedArticle.author.updatedAt.toISOString(),
         },
+        comments: updatedArticle.comments.map((comment) => ({
+          ...comment,
+          createdAt: comment.createdAt.toISOString(),
+          updatedAt: comment.updatedAt.toISOString(),
+          author: {
+            ...comment.author,
+            createdAt: comment.author.createdAt.toISOString(),
+            updatedAt: comment.author.updatedAt.toISOString(),
+          },
+        })),
       };
     },
     deleteArticle: async (_parent, { id }, context: DataSourceContext) => {
@@ -195,23 +261,26 @@ export const resolvers: Resolvers = {
           articleId,
           authorId: context.user.id,
         },
-        include: { article: true, author: true },
+        include: {
+          //  article: true,
+          author: true,
+        },
       });
 
       return {
         ...comment,
         createdAt: comment.createdAt.toISOString(),
         updatedAt: comment.updatedAt.toISOString(),
-        article: {
-          ...comment.article,
-          author: {
-            ...comment.author,
-            createdAt: comment.author.createdAt.toISOString(),
-            updatedAt: comment.author.updatedAt.toISOString(),
-          },
-          createdAt: comment.article.createdAt.toISOString(),
-          updatedAt: comment.article.updatedAt.toISOString(),
-        },
+        // article: {
+        //   ...comment.article,
+        //   author: {
+        //     ...comment.author,
+        //     createdAt: comment.author.createdAt.toISOString(),
+        //     updatedAt: comment.author.updatedAt.toISOString(),
+        //   },
+        //   createdAt: comment.article.createdAt.toISOString(),
+        //   updatedAt: comment.article.updatedAt.toISOString(),
+        // },
 
         author: {
           ...comment.author,
