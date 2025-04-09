@@ -25,20 +25,19 @@ const { url } = await startStandaloneServer(server, {
     if (token) {
       try {
         const { userId } = verifyToken(token);
-        user = { id: userId };
-      } catch (error) {
-        if (error instanceof Error) {
-          // biome-ignore lint/suspicious/noConsole: <explanation>
-          console.warn("Invalid or expired token:", error.message);
-        } else {
-          // biome-ignore lint/suspicious/noConsole: <explanation>
-          console.warn("Invalid or expired token:", error);
+        const dbUser = await db.user.findUnique({ where: { id: userId } });
+        if (dbUser) {
+          user = { id: dbUser.id };
         }
+      } catch (error) {
+        // biome-ignore lint/suspicious/noConsole: <explanation>
+        console.warn("Token verification failed:", error);
       }
     }
     return {
       dataSources: { db },
       user,
+      token,
     } satisfies DataSourceContext;
   },
 });
