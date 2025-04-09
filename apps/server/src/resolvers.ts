@@ -1,10 +1,11 @@
+import type { RefreshToken } from "@prisma/client";
 import { loginSchema, registerSchema } from "@repo/utils/schemas/auth";
 import { cursorSchema } from "@repo/utils/schemas/cursor";
 import bcrypt from "bcrypt";
 import { DateTimeResolver } from "graphql-scalars";
 import type { DataSourceContext } from "./context";
 import type { Resolvers } from "./types";
-import { generateToken } from "./utils/jwt.js";
+import { generateRefreshToken, generateToken, verifyRefreshToken } from "./utils/jwt.js";
 
 // Add this interface to define the cursor structure
 type ArticleCursor = {
@@ -55,13 +56,11 @@ export const resolvers: Resolvers = {
       await simulateDelay();
       const take = first || 10;
 
-      // Parse the cursor
       const cursor = after ? parseCursor(after) : null;
       if (after && !cursor) {
         throw new Error("Invalid cursor provided");
       }
 
-      // Build the where clause for cursor-based pagination
       const where = cursor
         ? {
             OR: [
@@ -103,13 +102,11 @@ export const resolvers: Resolvers = {
       await simulateDelay();
       const take = first || 10;
 
-      // Parse the cursor
       const cursor = after ? parseCursor(after) : null;
       if (after && !cursor) {
         throw new Error("Invalid cursor provided");
       }
 
-      // Build the where clause for cursor-based pagination
       const where = {
         authorId,
         ...(cursor
@@ -262,7 +259,12 @@ export const resolvers: Resolvers = {
         data: { email, password: hashedPassword, name },
       });
       const token = generateToken(user.id);
-      return { token, user };
+      const refreshToken = generateRefreshToken(user.id);
+      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+      await context.dataSources.db.refreshToken.create({
+        data: { token: hashedRefreshToken, userId: user.id },
+      });
+      return { token, refreshToken, user };
     },
     login: async (_parent, args, context: DataSourceContext) => {
       await simulateDelay();
@@ -276,7 +278,54 @@ export const resolvers: Resolvers = {
         throw new Error("Invalid email or password");
       }
       const token = generateToken(user.id);
-      return { token, user };
+      const refreshToken = generateRefreshToken(user.id);
+      const hashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+      await context.dataSources.db.refreshToken.create({
+        data: { token: hashedRefreshToken, userId: user.id },
+      });
+      return { token, refreshToken, user };
+    },
+    logout: async (_parent, { refreshToken }, context: DataSourceContext): Promise<boolean> => {
+      await simulateDelay();
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in to log out");
+      }
+      if (!refreshToken) {
+        throw new Error("Refresh token required");
+      }
+
+      try {
+        // NEW: Verify this is actually a valid refresh token
+        verifyRefreshToken(refreshToken);
+
+        // Find all refresh tokens for the user
+        const userRefreshTokens = await context.dataSources.db.refreshToken.findMany({
+          where: { userId: context.user.id },
+        });
+
+        // Check if the provided refresh token matches any of the stored hashed tokens
+        let matchedToken: RefreshToken | null = null;
+        for (const storedToken of userRefreshTokens) {
+          const isMatch = await bcrypt.compare(refreshToken, storedToken.token);
+          if (isMatch) {
+            matchedToken = storedToken;
+            break;
+          }
+        }
+
+        if (!matchedToken) {
+          throw new Error("Invalid refresh token");
+        }
+
+        // Delete the matched refresh token
+        await context.dataSources.db.refreshToken.delete({
+          where: { id: matchedToken.id },
+        });
+
+        return true;
+      } catch (error) {
+        throw new Error(`Logout failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
     },
     likeArticle: async (_parent, { articleId }, context) => {
       const userId = context.user?.id;
