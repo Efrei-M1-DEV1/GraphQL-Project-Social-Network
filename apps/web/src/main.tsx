@@ -1,4 +1,5 @@
-import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
+import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router"; // ensure using react-router-dom 6.4+
@@ -22,8 +23,22 @@ if (!import.meta.env.VITE_GRAPHQL_ENDPOINT) {
   throw new Error("VITE_GRAPHQL_ENDPOINT is not defined, please set it in your .env file");
 }
 
-const client = new ApolloClient({
+const httpLink = createHttpLink({
   uri: import.meta.env.VITE_GRAPHQL_ENDPOINT,
+});
+
+const authLink = setContext((_, { headers }) => {
+  const token = localStorage.getItem("token"); // Récupère le token depuis localStorage
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    },
+  };
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
   cache: new InMemoryCache(),
 });
 

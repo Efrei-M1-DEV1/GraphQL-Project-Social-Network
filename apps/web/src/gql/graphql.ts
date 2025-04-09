@@ -120,6 +120,16 @@ export type GetArticleQuery = {
   } | null;
 };
 
+export type CreateArticleMutationVariables = Exact<{
+  title: Scalars["String"]["input"];
+  content: Scalars["String"]["input"];
+}>;
+
+export type CreateArticleMutation = {
+  __typename?: "Mutation";
+  createArticle: { __typename?: "Article"; id: number; author: { __typename?: "User"; name?: string | null } };
+};
+
 export type ArticlesQueryVariables = Exact<{
   first?: InputMaybe<Scalars["Int"]["input"]>;
   after?: InputMaybe<Scalars["Int"]["input"]>;
@@ -215,6 +225,60 @@ export const GetArticleDocument = {
     },
   ],
 } as unknown as DocumentNode<GetArticleQuery, GetArticleQueryVariables>;
+export const CreateArticleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "CreateArticle" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "title" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "content" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "createArticle" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "title" },
+                value: { kind: "Variable", name: { kind: "Name", value: "title" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "content" },
+                value: { kind: "Variable", name: { kind: "Name", value: "content" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "author" },
+                  selectionSet: { kind: "SelectionSet", selections: [{ kind: "Field", name: { kind: "Name", value: "name" } }] },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateArticleMutation, CreateArticleMutationVariables>;
 export const ArticlesDocument = {
   kind: "Document",
   definitions: [

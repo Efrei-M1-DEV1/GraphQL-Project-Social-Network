@@ -41,11 +41,22 @@ export type Like = {
   user: User;
 };
 
+export type Comment = {
+  __typename?: "Comment";
+  article: Article;
+  author: User;
+  content: Scalars["String"]["output"];
+  createdAt: Scalars["String"]["output"];
+  id: Scalars["Int"]["output"];
+  updatedAt: Scalars["String"]["output"];
+};
+
 export type Mutation = {
   __typename?: "Mutation";
   createArticle: Article;
-  deleteArticle: Scalars["Boolean"]["output"];
   likeArticle: Like;
+  createComment: Comment;
+  deleteArticle: Scalars["Boolean"]["output"];
   login: AuthPayload;
   register: AuthPayload;
   unlikeArticle: Scalars["Boolean"]["output"];
@@ -55,6 +66,11 @@ export type Mutation = {
 export type MutationCreateArticleArgs = {
   content: Scalars["String"]["input"];
   title: Scalars["String"]["input"];
+};
+
+export type MutationCreateCommentArgs = {
+  articleId: Scalars["Int"]["input"];
+  content: Scalars["String"]["input"];
 };
 
 export type MutationDeleteArticleArgs = {
@@ -196,6 +212,7 @@ export type ResolversTypes = {
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
   Int: ResolverTypeWrapper<Scalars["Int"]["output"]>;
   Like: ResolverTypeWrapper<Like>;
+  Comment: ResolverTypeWrapper<Comment>;
   Mutation: ResolverTypeWrapper<{}>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars["String"]["output"]>;
@@ -207,8 +224,9 @@ export type ResolversParentTypes = {
   Article: Article;
   AuthPayload: AuthPayload;
   Boolean: Scalars["Boolean"]["output"];
-  Int: Scalars["Int"]["output"];
   Like: Like;
+  Comment: Comment;
+  Int: Scalars["Int"]["output"];
   Mutation: {};
   Query: {};
   String: Scalars["String"]["output"];
@@ -237,6 +255,18 @@ export type AuthPayloadResolvers<
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
+export type CommentResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Comment"] = ResolversParentTypes["Comment"],
+> = {
+  article?: Resolver<ResolversTypes["Article"], ParentType, ContextType>;
+  author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
 export type LikeResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["Like"] = ResolversParentTypes["Like"],
@@ -257,6 +287,12 @@ export type MutationResolvers<
     ParentType,
     ContextType,
     RequireFields<MutationCreateArticleArgs, "content" | "title">
+  >;
+  createComment?: Resolver<
+    ResolversTypes["Comment"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateCommentArgs, "articleId" | "content">
   >;
   deleteArticle?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationDeleteArticleArgs, "id">>;
   likeArticle?: Resolver<ResolversTypes["Like"], ParentType, ContextType, RequireFields<MutationLikeArticleArgs, "articleId">>;
@@ -313,6 +349,7 @@ export type Resolvers<ContextType = DataSourceContext> = {
   Article?: ArticleResolvers<ContextType>;
   AuthPayload?: AuthPayloadResolvers<ContextType>;
   Like?: LikeResolvers<ContextType>;
+  Comment?: CommentResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
