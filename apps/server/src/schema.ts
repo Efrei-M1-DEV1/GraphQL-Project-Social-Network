@@ -36,6 +36,7 @@ export const typeDefs = `#graphql
 
   type AuthPayload {
     token: String!
+    refreshToken: String!
     user: User!
   }
 
@@ -57,9 +58,9 @@ export const typeDefs = `#graphql
   type Query {
     hello: String
     users: [User!]!
-    articles(first: Int, after: String): ArticleConnection! # Updated to return a connection
+    articles(first: Int, after: String): ArticleConnection!
     article(id: Int!): Article
-    articlesByAuthor(authorId: Int!, first: Int, after: String): ArticleConnection! # Updated to return a connection
+    articlesByAuthor(authorId: Int!, first: Int, after: String): ArticleConnection!
   }
 
   type Mutation {
@@ -73,5 +74,6 @@ export const typeDefs = `#graphql
     createComment(content: String!, articleId: Int!): Comment!
     updateComment(id: Int!, content: String!): Comment!
     deleteComment(id: Int!): Boolean!
+    logout(refreshToken: String!): Boolean!
   }
 `;

@@ -1,4 +1,4 @@
-import { GraphQLResolveInfo } from "graphql";
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from "graphql";
 import { DataSourceContext } from "./context";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -15,6 +15,7 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  DateTime: { input: any; output: any };
 };
 
 export type Article = {
@@ -22,14 +23,27 @@ export type Article = {
   author: User;
   comments: Array<Comment>;
   content: Scalars["String"]["output"];
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
   title: Scalars["String"]["output"];
-  updatedAt: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type ArticleConnection = {
+  __typename?: "ArticleConnection";
+  edges: Array<ArticleEdge>;
+  pageInfo: PageInfo;
+};
+
+export type ArticleEdge = {
+  __typename?: "ArticleEdge";
+  cursor: Scalars["String"]["output"];
+  node: Article;
 };
 
 export type AuthPayload = {
   __typename?: "AuthPayload";
+  refreshToken: Scalars["String"]["output"];
   token: Scalars["String"]["output"];
   user: User;
 };
@@ -38,15 +52,15 @@ export type Comment = {
   __typename?: "Comment";
   author: User;
   content: Scalars["String"]["output"];
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
-  updatedAt: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
 };
 
 export type Like = {
   __typename?: "Like";
   article: Article;
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
   user: User;
 };
@@ -59,6 +73,7 @@ export type Mutation = {
   deleteComment: Scalars["Boolean"]["output"];
   likeArticle: Like;
   login: AuthPayload;
+  logout: Scalars["Boolean"]["output"];
   register: AuthPayload;
   unlikeArticle: Scalars["Boolean"]["output"];
   updateArticle: Article;
@@ -92,6 +107,10 @@ export type MutationLoginArgs = {
   password: Scalars["String"]["input"];
 };
 
+export type MutationLogoutArgs = {
+  refreshToken: Scalars["String"]["input"];
+};
+
 export type MutationRegisterArgs = {
   email: Scalars["String"]["input"];
   name: Scalars["String"]["input"];
@@ -113,11 +132,17 @@ export type MutationUpdateCommentArgs = {
   id: Scalars["Int"]["input"];
 };
 
+export type PageInfo = {
+  __typename?: "PageInfo";
+  endCursor?: Maybe<Scalars["String"]["output"]>;
+  hasNextPage: Scalars["Boolean"]["output"];
+};
+
 export type Query = {
   __typename?: "Query";
   article?: Maybe<Article>;
-  articles: Array<Article>;
-  articlesByAuthor: Array<Article>;
+  articles: ArticleConnection;
+  articlesByAuthor: ArticleConnection;
   hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
@@ -127,23 +152,23 @@ export type QueryArticleArgs = {
 };
 
 export type QueryArticlesArgs = {
-  after?: InputMaybe<Scalars["Int"]["input"]>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
   first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 export type QueryArticlesByAuthorArgs = {
-  after?: InputMaybe<Scalars["Int"]["input"]>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
   authorId: Scalars["Int"]["input"];
   first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 export type User = {
   __typename?: "User";
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   email: Scalars["String"]["output"];
   id: Scalars["Int"]["output"];
   name?: Maybe<Scalars["String"]["output"]>;
-  updatedAt: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
 };
 
 export type ResolverTypeWrapper<T> = Promise<T> | T;
@@ -219,12 +244,16 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Article: ResolverTypeWrapper<Article>;
+  ArticleConnection: ResolverTypeWrapper<ArticleConnection>;
+  ArticleEdge: ResolverTypeWrapper<ArticleEdge>;
   AuthPayload: ResolverTypeWrapper<AuthPayload>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
   Comment: ResolverTypeWrapper<Comment>;
+  DateTime: ResolverTypeWrapper<Scalars["DateTime"]["output"]>;
   Int: ResolverTypeWrapper<Scalars["Int"]["output"]>;
   Like: ResolverTypeWrapper<Like>;
   Mutation: ResolverTypeWrapper<{}>;
+  PageInfo: ResolverTypeWrapper<PageInfo>;
   Query: ResolverTypeWrapper<{}>;
   String: ResolverTypeWrapper<Scalars["String"]["output"]>;
   User: ResolverTypeWrapper<User>;
@@ -233,12 +262,16 @@ export type ResolversTypes = {
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Article: Article;
+  ArticleConnection: ArticleConnection;
+  ArticleEdge: ArticleEdge;
   AuthPayload: AuthPayload;
   Boolean: Scalars["Boolean"]["output"];
   Comment: Comment;
+  DateTime: Scalars["DateTime"]["output"];
   Int: Scalars["Int"]["output"];
   Like: Like;
   Mutation: {};
+  PageInfo: PageInfo;
   Query: {};
   String: Scalars["String"]["output"];
   User: User;
@@ -251,10 +284,28 @@ export type ArticleResolvers<
   author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   comments?: Resolver<Array<ResolversTypes["Comment"]>, ParentType, ContextType>;
   content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   title?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ArticleConnectionResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["ArticleConnection"] = ResolversParentTypes["ArticleConnection"],
+> = {
+  edges?: Resolver<Array<ResolversTypes["ArticleEdge"]>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes["PageInfo"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type ArticleEdgeResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["ArticleEdge"] = ResolversParentTypes["ArticleEdge"],
+> = {
+  cursor?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  node?: Resolver<ResolversTypes["Article"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -262,6 +313,7 @@ export type AuthPayloadResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["AuthPayload"] = ResolversParentTypes["AuthPayload"],
 > = {
+  refreshToken?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   token?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -273,18 +325,22 @@ export type CommentResolvers<
 > = {
   author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
+
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes["DateTime"], any> {
+  name: "DateTime";
+}
 
 export type LikeResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["Like"] = ResolversParentTypes["Like"],
 > = {
   article?: Resolver<ResolversTypes["Article"], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -315,6 +371,7 @@ export type MutationResolvers<
     ContextType,
     RequireFields<MutationLoginArgs, "email" | "password">
   >;
+  logout?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationLogoutArgs, "refreshToken">>;
   register?: Resolver<
     ResolversTypes["AuthPayload"],
     ParentType,
@@ -336,14 +393,23 @@ export type MutationResolvers<
   >;
 };
 
+export type PageInfoResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["PageInfo"] = ResolversParentTypes["PageInfo"],
+> = {
+  endCursor?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  hasNextPage?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
 export type QueryResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"],
 > = {
   article?: Resolver<Maybe<ResolversTypes["Article"]>, ParentType, ContextType, RequireFields<QueryArticleArgs, "id">>;
-  articles?: Resolver<Array<ResolversTypes["Article"]>, ParentType, ContextType, Partial<QueryArticlesArgs>>;
+  articles?: Resolver<ResolversTypes["ArticleConnection"], ParentType, ContextType, Partial<QueryArticlesArgs>>;
   articlesByAuthor?: Resolver<
-    Array<ResolversTypes["Article"]>,
+    ResolversTypes["ArticleConnection"],
     ParentType,
     ContextType,
     RequireFields<QueryArticlesByAuthorArgs, "authorId">
@@ -356,20 +422,24 @@ export type UserResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"],
 > = {
-  createdAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   email?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = DataSourceContext> = {
   Article?: ArticleResolvers<ContextType>;
+  ArticleConnection?: ArticleConnectionResolvers<ContextType>;
+  ArticleEdge?: ArticleEdgeResolvers<ContextType>;
   AuthPayload?: AuthPayloadResolvers<ContextType>;
   Comment?: CommentResolvers<ContextType>;
+  DateTime?: GraphQLScalarType;
   Like?: LikeResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  PageInfo?: PageInfoResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
