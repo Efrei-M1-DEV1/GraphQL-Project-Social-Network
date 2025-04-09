@@ -1,10 +1,12 @@
 export const typeDefs = `#graphql
-   type User {
+  scalar DateTime
+
+  type User {
     id: Int!
     email: String!
     name: String
-    createdAt: String!
-    updatedAt: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Article {
@@ -13,39 +15,36 @@ export const typeDefs = `#graphql
     content: String!
     author: User!
     comments: [Comment!]!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: DateTime!
+    updatedAt: DateTime!
   }
 
   type Like {
     id: Int!
     user: User!
     article: Article!
-    createdAt: String!
+    createdAt: DateTime!
   }
 
-  type Comment{
-  id:Int!
-  content: String!
-  author: User!    
-  createdAt: String!
-  updatedAt: String! 
-}
-  
+  type Comment {
+    id: Int!
+    content: String!
+    author: User!
+    createdAt: DateTime!
+    updatedAt: DateTime!
+  }
 
   type AuthPayload {
     token: String!
     user: User!
   }
 
-
   type Query {
     hello: String
     users: [User!]!
-    articles(first: Int, after: Int): [Article!]! # All articles with pagination
-    article(id: Int!): Article # Single article by ID
-    articlesByAuthor(authorId: Int!, first: Int, after: Int): [Article!]! # Author-specific articles with pagination
-    
+    articles(first: Int, after: Int): [Article!]!
+    article(id: Int!): Article
+    articlesByAuthor(authorId: Int!, first: Int, after: Int): [Article!]!
   }
 
   type Mutation {
@@ -54,7 +53,6 @@ export const typeDefs = `#graphql
     deleteArticle(id: Int!): Boolean!
     register(email: String!, password: String!, name: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
-
     likeArticle(articleId: Int!): Like!
     unlikeArticle(articleId: Int!): Boolean!
     createComment(content: String!, articleId: Int!): Comment!
