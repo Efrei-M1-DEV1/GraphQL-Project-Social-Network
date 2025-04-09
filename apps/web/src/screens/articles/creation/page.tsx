@@ -4,7 +4,7 @@ import { useMutation } from "@apollo/client";
 import { Card, CardBody, CardHeader, CardTitle } from "@repo/ui/data-display/card";
 import { Button } from "@repo/ui/form/button";
 import { Input } from "@repo/ui/form/input";
-import { createAticleSchema } from "@repo/utils/schemas/article";
+import { createArticleSchema } from "@repo/utils/schemas/article";
 import type React from "react";
 import { useNavigate } from "react-router";
 
@@ -37,7 +37,7 @@ export default function ArticleCreationPage() {
     const title = payload.get("title") as string;
     const content = payload.get("content") as string;
 
-    const parsed = createAticleSchema.safeParse({
+    const parsed = createArticleSchema.safeParse({
       title,
       content,
     });

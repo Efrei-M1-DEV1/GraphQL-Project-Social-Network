@@ -111,6 +111,12 @@ export const router = createBrowserRouter([
             }),
           },
           {
+            path: "update/:id",
+            lazy: async () => ({
+              Component: PageWrapper((await import("./screens/articles/update/[id]/page")).default),
+            }),
+          },
+          {
             path: ":id",
             lazy: async () => ({
               Component: PageWrapper((await import("./screens/articles/[id]/page")).default),
