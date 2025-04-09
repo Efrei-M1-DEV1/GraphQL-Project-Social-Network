@@ -32,7 +32,8 @@ model Article {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  @@index([title]) // Index for title searches
+  @@index([title])
+  @@index([createdAt, id]) // Composite index for performance on recent articles
 }
 
 model Comment {

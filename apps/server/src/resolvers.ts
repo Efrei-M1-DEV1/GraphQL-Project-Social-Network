@@ -1,9 +1,29 @@
 import { loginSchema, registerSchema } from "@repo/utils/schemas/auth";
+import { cursorSchema } from "@repo/utils/schemas/cursor";
 import bcrypt from "bcrypt";
 import { DateTimeResolver } from "graphql-scalars";
 import type { DataSourceContext } from "./context";
 import type { Resolvers } from "./types";
 import { generateToken } from "./utils/jwt.js";
+
+// Add this interface to define the cursor structure
+type ArticleCursor = {
+  createdAt: string;
+  id: number;
+};
+
+// Helper function to parse and validate the cursor
+const parseCursor = (after: string): ArticleCursor | null => {
+  try {
+    const decoded = Buffer.from(after, "base64").toString("utf-8");
+    const cursor = cursorSchema.parse(JSON.parse(decoded));
+    return cursor;
+  } catch (error) {
+    // biome-ignore lint/suspicious/noConsole: <explanation>
+    console.warn("Failed to parse cursor:", error);
+    return null;
+  }
+};
 
 // Helper function to simulate a delay in development environment
 const simulateDelay = async () => {
@@ -13,7 +33,7 @@ const simulateDelay = async () => {
 };
 
 export const resolvers: Resolvers = {
-  DateTime: DateTimeResolver, // Add the DateTime scalar resolver
+  DateTime: DateTimeResolver,
 
   Query: {
     hello: async () => {
@@ -26,38 +46,109 @@ export const resolvers: Resolvers = {
     },
     article: async (_parent, { id }, context: DataSourceContext) => {
       await simulateDelay();
-      const article = await context.dataSources.db.article.findUnique({
+      return context.dataSources.db.article.findUnique({
         where: { id },
-        include: {
-          author: true,
-          comments: {
-            include: { author: true },
-          },
-        },
+        include: { author: true, comments: { include: { author: true } } },
       });
-      return article;
     },
     articles: async (_parent, { first, after }, context: DataSourceContext) => {
       await simulateDelay();
-      return context.dataSources.db.article.findMany({
-        take: first || 10,
-        skip: after || 0,
-        orderBy: { createdAt: "desc" },
-        include: {
-          author: true,
-          comments: { include: { author: true } },
-        },
+      const take = first || 10;
+
+      // Parse the cursor
+      const cursor = after ? parseCursor(after) : null;
+      if (after && !cursor) {
+        throw new Error("Invalid cursor provided");
+      }
+
+      // Build the where clause for cursor-based pagination
+      const where = cursor
+        ? {
+            OR: [
+              { createdAt: { lt: new Date(cursor.createdAt) } },
+              { createdAt: { equals: new Date(cursor.createdAt) }, id: { lt: cursor.id } },
+            ],
+          }
+        : {};
+
+      const articles = await context.dataSources.db.article.findMany({
+        take: take + 1,
+        where,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        include: { author: true, comments: { include: { author: true } } },
       });
+
+      const hasNextPage = articles.length > take;
+      const nodes = hasNextPage ? articles.slice(0, take) : articles;
+
+      const edges = nodes.map((article) => ({
+        cursor: Buffer.from(
+          JSON.stringify({
+            createdAt: article.createdAt.toISOString(),
+            id: article.id,
+          }),
+        ).toString("base64"),
+        node: article,
+      }));
+
+      return {
+        edges,
+        pageInfo: {
+          hasNextPage,
+          endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+        },
+      };
     },
     articlesByAuthor: async (_parent, { authorId, first, after }, context: DataSourceContext) => {
       await simulateDelay();
-      return context.dataSources.db.article.findMany({
-        where: { authorId },
-        take: first || 10,
-        skip: after || 0,
-        orderBy: { createdAt: "desc" },
+      const take = first || 10;
+
+      // Parse the cursor
+      const cursor = after ? parseCursor(after) : null;
+      if (after && !cursor) {
+        throw new Error("Invalid cursor provided");
+      }
+
+      // Build the where clause for cursor-based pagination
+      const where = {
+        authorId,
+        ...(cursor
+          ? {
+              OR: [
+                { createdAt: { lt: new Date(cursor.createdAt) } },
+                { createdAt: { equals: new Date(cursor.createdAt) }, id: { lt: cursor.id } },
+              ],
+            }
+          : {}),
+      };
+
+      const articles = await context.dataSources.db.article.findMany({
+        take: take + 1,
+        where,
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
         include: { author: true, comments: { include: { author: true } } },
       });
+
+      const hasNextPage = articles.length > take;
+      const nodes = hasNextPage ? articles.slice(0, take) : articles;
+
+      const edges = nodes.map((article) => ({
+        cursor: Buffer.from(
+          JSON.stringify({
+            createdAt: article.createdAt.toISOString(),
+            id: article.id,
+          }),
+        ).toString("base64"),
+        node: article,
+      }));
+
+      return {
+        edges,
+        pageInfo: {
+          hasNextPage,
+          endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+        },
+      };
     },
   },
   Mutation: {
