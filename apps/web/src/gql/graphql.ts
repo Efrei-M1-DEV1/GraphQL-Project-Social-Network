@@ -19,6 +19,7 @@ export type Scalars = {
 export type Article = {
   __typename?: "Article";
   author: User;
+  comments: Array<Comment>;
   content: Scalars["String"]["output"];
   createdAt: Scalars["String"]["output"];
   id: Scalars["Int"]["output"];
@@ -32,13 +33,35 @@ export type AuthPayload = {
   user: User;
 };
 
+export type Comment = {
+  __typename?: "Comment";
+  author: User;
+  content: Scalars["String"]["output"];
+  createdAt: Scalars["String"]["output"];
+  id: Scalars["Int"]["output"];
+  updatedAt: Scalars["String"]["output"];
+};
+
+export type Like = {
+  __typename?: "Like";
+  article: Article;
+  createdAt: Scalars["String"]["output"];
+  id: Scalars["Int"]["output"];
+  user: User;
+};
+
 export type Mutation = {
   __typename?: "Mutation";
   createArticle: Article;
+  createComment: Comment;
   deleteArticle: Scalars["Boolean"]["output"];
+  deleteComment: Scalars["Boolean"]["output"];
+  likeArticle: Like;
   login: AuthPayload;
   register: AuthPayload;
+  unlikeArticle: Scalars["Boolean"]["output"];
   updateArticle: Article;
+  updateComment: Comment;
 };
 
 export type MutationCreateArticleArgs = {
@@ -46,8 +69,21 @@ export type MutationCreateArticleArgs = {
   title: Scalars["String"]["input"];
 };
 
+export type MutationCreateCommentArgs = {
+  articleId: Scalars["Int"]["input"];
+  content: Scalars["String"]["input"];
+};
+
 export type MutationDeleteArticleArgs = {
   id: Scalars["Int"]["input"];
+};
+
+export type MutationDeleteCommentArgs = {
+  id: Scalars["Int"]["input"];
+};
+
+export type MutationLikeArticleArgs = {
+  articleId: Scalars["Int"]["input"];
 };
 
 export type MutationLoginArgs = {
@@ -61,10 +97,19 @@ export type MutationRegisterArgs = {
   password: Scalars["String"]["input"];
 };
 
+export type MutationUnlikeArticleArgs = {
+  articleId: Scalars["Int"]["input"];
+};
+
 export type MutationUpdateArticleArgs = {
   content?: InputMaybe<Scalars["String"]["input"]>;
   id: Scalars["Int"]["input"];
   title?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type MutationUpdateCommentArgs = {
+  content: Scalars["String"]["input"];
+  id: Scalars["Int"]["input"];
 };
 
 export type Query = {

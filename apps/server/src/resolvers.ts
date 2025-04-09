@@ -427,10 +427,15 @@ export const resolvers: Resolvers = {
           userId,
         },
         include: {
-          user: true, // Inclure les données de l'utilisateur
+          user: true,
           article: {
             include: {
-              author: true, // Inclure l'auteur de l'article
+              author: true,
+              comments: {
+                include: {
+                  author: true,
+                },
+              },
             },
           },
         },
@@ -465,6 +470,16 @@ export const resolvers: Resolvers = {
             createdAt: like.article.author.createdAt.toISOString(),
             updatedAt: like.article.author.updatedAt.toISOString(),
           },
+          comments: like.article.comments.map((comment) => ({
+            ...comment,
+            createdAt: comment.createdAt.toISOString(),
+            updatedAt: comment.updatedAt.toISOString(),
+            author: {
+              ...comment.author,
+              createdAt: comment.author.createdAt.toISOString(),
+              updatedAt: comment.author.updatedAt.toISOString(),
+            },
+          })),
         },
       };
     },
