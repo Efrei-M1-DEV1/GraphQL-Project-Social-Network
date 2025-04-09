@@ -16,13 +16,6 @@ query Query($id: Int!) {
     content
   }
 }
-#   query GetArticle($id: Int!) {
-#     article(id: $id) {
-#       id
-#       title
-#       content
-#     }
-#   }
 `);
 
 const UPDATE_ARTICLE_MUTATION = graphql(`
