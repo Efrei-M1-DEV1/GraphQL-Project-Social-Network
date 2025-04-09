@@ -15,7 +15,7 @@ import * as types from "./graphql";
  */
 type Documents = {
   "\n  query Hello {\n    hello\n  }\n": typeof types.HelloDocument;
-  "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n": typeof types.GetArticleDocument;
+  "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n      likes\n    }\n  }\n": typeof types.GetArticleDocument;
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n": typeof types.CreateArticleDocument;
   "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n": typeof types.ArticlesDocument;
   "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": typeof types.QueryDocument;
@@ -25,7 +25,7 @@ type Documents = {
 };
 const documents: Documents = {
   "\n  query Hello {\n    hello\n  }\n": types.HelloDocument,
-  "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n":
+  "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n      likes\n    }\n  }\n":
     types.GetArticleDocument,
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n":
     types.CreateArticleDocument,
@@ -62,8 +62,8 @@ export function graphql(source: "\n  query Hello {\n    hello\n  }\n"): (typeof 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n",
-): (typeof documents)["\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n"];
+  source: "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n      likes\n    }\n  }\n",
+): (typeof documents)["\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n      likes\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

@@ -23,6 +23,7 @@ export type Article = {
   content: Scalars["String"]["output"];
   createdAt: Scalars["String"]["output"];
   id: Scalars["Int"]["output"];
+  likes: Scalars["Int"]["output"];
   title: Scalars["String"]["output"];
   updatedAt: Scalars["String"]["output"];
 };
@@ -161,6 +162,7 @@ export type GetArticleQuery = {
     title: string;
     content: string;
     createdAt: string;
+    likes: number;
     author: { __typename?: "User"; id: number; name?: string | null };
   } | null;
 };
@@ -282,6 +284,7 @@ export const GetArticleDocument = {
                     ],
                   },
                 },
+                { kind: "Field", name: { kind: "Name", value: "likes" } },
               ],
             },
           },

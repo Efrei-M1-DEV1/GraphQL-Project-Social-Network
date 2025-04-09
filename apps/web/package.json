@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.13.5",
+    "@graphql-typed-document-node/core": "^3.2.0",
     "@reduxjs/toolkit": "^2.6.1",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",

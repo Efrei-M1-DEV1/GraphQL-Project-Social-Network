@@ -6,7 +6,7 @@ import { Badge } from "@repo/ui/data-display/badge";
 import { Card, CardBody, CardDescription, CardHeader, CardTitle } from "@repo/ui/data-display/card";
 import { Icon } from "@repo/ui/media/icon";
 import { Suspense } from "react";
-import { LuStar } from "react-icons/lu";
+import { LuThumbsUp } from "react-icons/lu";
 import { useNavigate } from "react-router";
 
 const GET_ARTICLE = graphql(`
@@ -20,6 +20,7 @@ const GET_ARTICLE = graphql(`
         id
         name
       }
+      likes
     }
   }
 `);
@@ -79,8 +80,8 @@ function ArticleDetails(props: ArticleDetailsProps) {
             })}
           </Badge>
           <span className="flex-1" />
-          <Icon as={LuStar} className="fill-yellow-400 text-yellow-400" />
-          <span className="text-gray-500 text-xs dark:text-gray-400">(120 Reviews)</span>
+          <Icon as={LuThumbsUp} className="fill-yellow-400 text-yellow-400" />
+          <span className="text-gray-500 text-xs dark:text-gray-400">({data.article.likes} likes)</span>
         </div>
       </CardHeader>
       <CardBody>
