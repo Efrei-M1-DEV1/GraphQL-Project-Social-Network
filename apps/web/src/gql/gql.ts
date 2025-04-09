@@ -18,6 +18,7 @@ type Documents = {
   "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n": typeof types.GetArticleDocument;
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n": typeof types.CreateArticleDocument;
   "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n": typeof types.ArticlesDocument;
+  "\n  mutation DeleteArticle($deleteArticleId: Int!) {\n    deleteArticle(id: $deleteArticleId)\n  }\n": typeof types.DeleteArticleDocument;
   "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": typeof types.QueryDocument;
   "\n  mutation UpdateArticle($id: Int!, $title: String!, $content: String!) {\n    updateArticle(id: $id, title: $title, content: $content) {\n      id\n      title\n      content\n    }\n  }\n": typeof types.UpdateArticleDocument;
   "\n  mutation Login($email: String!, $password: String!) {\n    login(email: $email, password: $password) {\n      token\n      user {\n        id\n        name\n      }\n    }\n  }\n": typeof types.LoginDocument;
@@ -31,6 +32,8 @@ const documents: Documents = {
     types.CreateArticleDocument,
   "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n":
     types.ArticlesDocument,
+  "\n  mutation DeleteArticle($deleteArticleId: Int!) {\n    deleteArticle(id: $deleteArticleId)\n  }\n":
+    types.DeleteArticleDocument,
   "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": types.QueryDocument,
   "\n  mutation UpdateArticle($id: Int!, $title: String!, $content: String!) {\n    updateArticle(id: $id, title: $title, content: $content) {\n      id\n      title\n      content\n    }\n  }\n":
     types.UpdateArticleDocument,
@@ -76,6 +79,12 @@ export function graphql(
 export function graphql(
   source: "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n",
 ): (typeof documents)["\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n"];
+/**
+ * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
+ */
+export function graphql(
+  source: "\n  mutation DeleteArticle($deleteArticleId: Int!) {\n    deleteArticle(id: $deleteArticleId)\n  }\n",
+): (typeof documents)["\n  mutation DeleteArticle($deleteArticleId: Int!) {\n    deleteArticle(id: $deleteArticleId)\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
