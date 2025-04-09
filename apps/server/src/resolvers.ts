@@ -231,6 +231,30 @@ export const resolvers: Resolvers = {
         throw new Error("Unauthorized");
       }
 
+      if (!articleId) {
+        throw new Error("Article ID is required");
+      }
+
+      // Vérifier si le like existe déjà
+      const existingLike = await context.dataSources.db.like.findFirst({
+        where: {
+          userId,
+          articleId,
+        },
+      });
+
+      if (existingLike) {
+        throw new Error("You have already liked this article");
+      }
+
+      const article = await context.dataSources.db.article.findUnique({
+        where: { id: articleId },
+        include: { likes: true }, // Inclure l'auteur de l'article
+      });
+      if (!article) {
+        throw new Error("Article not found");
+      }
+
       const like = await context.dataSources.db.like.create({
         data: {
           articleId,
@@ -246,6 +270,18 @@ export const resolvers: Resolvers = {
         },
       });
 
+      if (!like) {
+        throw new Error("Failed to like article");
+      }
+
+      await context.dataSources.db.article.update({
+        where: { id: articleId },
+        data: {
+          likes: {
+            connect: { id: like.id }, // Connecter le nouveau like à l'article
+          },
+        },
+      });
       return {
         ...like,
         createdAt: like.createdAt.toISOString(),
