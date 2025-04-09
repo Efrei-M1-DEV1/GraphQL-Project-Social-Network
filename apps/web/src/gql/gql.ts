@@ -18,7 +18,7 @@ type Documents = {
   "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n": typeof types.GetArticleDocument;
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n": typeof types.CreateArticleDocument;
   "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n": typeof types.ArticlesDocument;
-  "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n#   query GetArticle($id: Int!) {\n#     article(id: $id) {\n#       id\n#       title\n#       content\n#     }\n#   }\n": typeof types.QueryDocument;
+  "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": typeof types.QueryDocument;
   "\n  mutation UpdateArticle($id: Int!, $title: String!, $content: String!) {\n    updateArticle(id: $id, title: $title, content: $content) {\n      id\n      title\n      content\n    }\n  }\n": typeof types.UpdateArticleDocument;
   "\n  mutation Login($email: String!, $password: String!) {\n    login(email: $email, password: $password) {\n      token\n      user {\n        id\n        name\n      }\n    }\n  }\n": typeof types.LoginDocument;
   "\n  mutation Register($email: String!, $password: String!, $name: String!) {\n    register(email: $email, password: $password, name: $name) {\n      token\n      user {\n        id\n        name\n      }\n    }\n  }\n": typeof types.RegisterDocument;
@@ -31,8 +31,7 @@ const documents: Documents = {
     types.CreateArticleDocument,
   "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n":
     types.ArticlesDocument,
-  "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n#   query GetArticle($id: Int!) {\n#     article(id: $id) {\n#       id\n#       title\n#       content\n#     }\n#   }\n":
-    types.QueryDocument,
+  "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": types.QueryDocument,
   "\n  mutation UpdateArticle($id: Int!, $title: String!, $content: String!) {\n    updateArticle(id: $id, title: $title, content: $content) {\n      id\n      title\n      content\n    }\n  }\n":
     types.UpdateArticleDocument,
   "\n  mutation Login($email: String!, $password: String!) {\n    login(email: $email, password: $password) {\n      token\n      user {\n        id\n        name\n      }\n    }\n  }\n":
@@ -81,8 +80,8 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n#   query GetArticle($id: Int!) {\n#     article(id: $id) {\n#       id\n#       title\n#       content\n#     }\n#   }\n",
-): (typeof documents)["\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n#   query GetArticle($id: Int!) {\n#     article(id: $id) {\n#       id\n#       title\n#       content\n#     }\n#   }\n"];
+  source: "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n",
+): (typeof documents)["\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
