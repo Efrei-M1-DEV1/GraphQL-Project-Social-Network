@@ -390,5 +390,116 @@ export const resolvers: Resolvers = {
         },
       };
     },
+
+    likeArticle: async (_parent, { articleId }, context) => {
+      const userId = context.user?.id;
+      if (!userId) {
+        throw new Error("Unauthorized");
+      }
+
+      if (!articleId) {
+        throw new Error("Article ID is required");
+      }
+
+      // Vérifier si le like existe déjà
+      const existingLike = await context.dataSources.db.like.findFirst({
+        where: {
+          userId,
+          articleId,
+        },
+      });
+
+      if (existingLike) {
+        throw new Error("You have already liked this article");
+      }
+
+      const article = await context.dataSources.db.article.findUnique({
+        where: { id: articleId },
+        include: { likes: true }, // Inclure l'auteur de l'article
+      });
+      if (!article) {
+        throw new Error("Article not found");
+      }
+
+      const like = await context.dataSources.db.like.create({
+        data: {
+          articleId,
+          userId,
+        },
+        include: {
+          user: true,
+          article: {
+            include: {
+              author: true,
+              comments: {
+                include: {
+                  author: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!like) {
+        throw new Error("Failed to like article");
+      }
+
+      await context.dataSources.db.article.update({
+        where: { id: articleId },
+        data: {
+          likes: {
+            connect: { id: like.id }, // Connecter le nouveau like à l'article
+          },
+        },
+      });
+      return {
+        ...like,
+        createdAt: like.createdAt.toISOString(),
+        user: {
+          ...like.user,
+          createdAt: like.user.createdAt.toISOString(),
+          updatedAt: like.user.updatedAt.toISOString(),
+        },
+        article: {
+          ...like.article,
+          createdAt: like.article.createdAt.toISOString(),
+          updatedAt: like.article.updatedAt.toISOString(),
+          author: {
+            ...like.article.author,
+            createdAt: like.article.author.createdAt.toISOString(),
+            updatedAt: like.article.author.updatedAt.toISOString(),
+          },
+          comments: like.article.comments.map((comment) => ({
+            ...comment,
+            createdAt: comment.createdAt.toISOString(),
+            updatedAt: comment.updatedAt.toISOString(),
+            author: {
+              ...comment.author,
+              createdAt: comment.author.createdAt.toISOString(),
+              updatedAt: comment.author.updatedAt.toISOString(),
+            },
+          })),
+        },
+      };
+    },
+    unlikeArticle: async (_parent, { articleId }, context: DataSourceContext): Promise<boolean> => {
+      await simulateDelay();
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+
+      const existingLike = await context.dataSources.db.like.findFirst({
+        where: { userId: context.user.id, articleId },
+      });
+      if (!existingLike) {
+        throw new Error("Like not found");
+      }
+
+      await context.dataSources.db.like.delete({
+        where: { id: existingLike.id },
+      });
+      return true;
+    },
   },
 };
