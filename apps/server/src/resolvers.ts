@@ -259,6 +259,7 @@ export const resolvers: Resolvers = {
         },
         include: {
           author: true,
+          article: true,
         },
       });
 
@@ -272,6 +273,63 @@ export const resolvers: Resolvers = {
           updatedAt: comment.author.updatedAt.toISOString(),
         },
       };
+    },
+
+    updateComment: async (_parent, { id, content }: { id: number; content: string }, context: DataSourceContext) => {
+      await simulateDelay();
+
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+      const comment = await context.dataSources.db.comment.findUnique({
+        where: { id },
+        include: { author: true },
+      });
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+      if (comment.authorId !== context.user.id) {
+        throw new Error("Forbidden: You can only update your own comments");
+      }
+      const updatedComment = await context.dataSources.db.comment.update({
+        where: { id },
+        data: { content },
+        include: { author: true, article: true },
+      });
+      return {
+        ...updatedComment,
+        createdAt: updatedComment.createdAt.toISOString(),
+        updatedAt: updatedComment.updatedAt.toISOString(),
+        author: {
+          ...updatedComment.author,
+          createdAt: updatedComment.author.createdAt.toISOString(),
+          updatedAt: updatedComment.author.updatedAt.toISOString(),
+        },
+        article: {
+          ...updatedComment.article,
+          createdAt: updatedComment.article.createdAt.toISOString(),
+          updatedAt: updatedComment.article.updatedAt.toISOString(),
+        },
+      };
+    },
+
+    deleteComment: async (_parent, { id }: { id: number }, context: DataSourceContext) => {
+      await simulateDelay();
+
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+      const comment = await context.dataSources.db.comment.findUnique({
+        where: { id },
+      });
+      if (!comment) {
+        throw new Error("Comment not found");
+      }
+      if (comment.authorId !== context.user.id) {
+        throw new Error("Forbidden: You can only delete your own comments");
+      }
+      await context.dataSources.db.comment.delete({ where: { id } });
+      return true;
     },
 
     register: async (_parent, args, context: DataSourceContext) => {

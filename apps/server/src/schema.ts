@@ -48,5 +48,7 @@ export const typeDefs = `#graphql
     register(email: String!, password: String!, name: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
     createComment(content: String!, articleId: Int!): Comment!
+    updateComment(id: Int!, content: String!): Comment!
+    deleteComment(id: Int!): Boolean!
   }
 `;
