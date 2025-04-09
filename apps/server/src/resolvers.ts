@@ -61,11 +61,7 @@ export const resolvers: Resolvers = {
           ...comment,
           createdAt: comment.createdAt.toISOString(),
           updatedAt: comment.updatedAt.toISOString(),
-          // article: {
-          //   ...comment.article,
-          //   createdAt: comment.article.createdAt.toISOString(),
-          //   updatedAt: comment.article.updatedAt.toISOString(),
-          // },
+
           author: {
             ...comment.author,
             createdAt: comment.author.createdAt.toISOString(),
@@ -262,7 +258,6 @@ export const resolvers: Resolvers = {
           authorId: context.user.id,
         },
         include: {
-          //  article: true,
           author: true,
         },
       });
@@ -271,17 +266,6 @@ export const resolvers: Resolvers = {
         ...comment,
         createdAt: comment.createdAt.toISOString(),
         updatedAt: comment.updatedAt.toISOString(),
-        // article: {
-        //   ...comment.article,
-        //   author: {
-        //     ...comment.author,
-        //     createdAt: comment.author.createdAt.toISOString(),
-        //     updatedAt: comment.author.updatedAt.toISOString(),
-        //   },
-        //   createdAt: comment.article.createdAt.toISOString(),
-        //   updatedAt: comment.article.updatedAt.toISOString(),
-        // },
-
         author: {
           ...comment.author,
           createdAt: comment.author.createdAt.toISOString(),
@@ -289,6 +273,7 @@ export const resolvers: Resolvers = {
         },
       };
     },
+
     register: async (_parent, args, context: DataSourceContext) => {
       // Simulate a delay for demonstration purposes
       await simulateDelay();
