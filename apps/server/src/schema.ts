@@ -39,12 +39,27 @@ export const typeDefs = `#graphql
     user: User!
   }
 
+  type ArticleConnection {
+    edges: [ArticleEdge!]!
+    pageInfo: PageInfo!
+  }
+
+  type ArticleEdge {
+    node: Article!
+    cursor: String!
+  }
+
+  type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
+  }
+
   type Query {
     hello: String
     users: [User!]!
-    articles(first: Int, after: Int): [Article!]!
+    articles(first: Int, after: String): ArticleConnection! # Updated to return a connection
     article(id: Int!): Article
-    articlesByAuthor(authorId: Int!, first: Int, after: Int): [Article!]!
+    articlesByAuthor(authorId: Int!, first: Int, after: String): ArticleConnection! # Updated to return a connection
   }
 
   type Mutation {
