@@ -1,0 +1,18 @@
+{
+  "extends": "@repo/typescript-config/base.json",
+  "include": ["."],
+  "compilerOptions": {
+    "rootDirs": ["src"],
+    "outDir": "dist",
+    "lib": ["es2020"],
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true,
+    "target": "es2020",
+    "module": "esnext",
+    "esModuleInterop": true,
+    "resolveJsonModule": true, // Add this line
+    "allowJs": true, // Add this line
+    "types": ["node"]
+  }
+}

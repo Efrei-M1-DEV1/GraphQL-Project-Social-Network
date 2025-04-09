@@ -1,0 +1,140 @@
+/* Import custom font from public directory */
+@font-face {
+  font-family: "Quicksand";
+  src: url("/static/assets/fonts/Quicksand.woff2") format("woff2"),;
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root[data-theme="light"] {
+    --colors-bg: theme("colors.white");
+    --colors-fg: theme("colors.black");
+    --colors-border: theme("colors.gray.200");
+    --colors-subtle: theme("colors.gray.100");
+    --colors-muted: theme("colors.gray.200");
+    --colors-emphasized: theme("colors.gray.300");
+    --colors-inverted: theme("colors.gray.800");
+    --colors-solid: theme("colors.gray.900");
+    --colors-focus-ring: theme("colors.gray.800");
+    --colors-error: theme("colors.red.500");
+    --colors-warning: theme("colors.orange.500");
+    --colors-success: theme("colors.green.500");
+    --colors-info: theme("colors.blue.500");
+    --colors-shadow: theme("colors.gray.900");
+    --colors-shadow-1: color-mix(in srgb, theme("colors.gray.900") 10%, transparent);
+    --colors-shadow-2: color-mix(in srgb, theme("colors.gray.900") 20%, transparent);
+  }
+
+  :root[data-theme="dark"] {
+    --colors-bg: theme("colors.black");
+    --colors-fg: theme("colors.gray.50");
+    --colors-border: theme("colors.gray.800");
+    --colors-subtle: theme("colors.gray.900");
+    --colors-muted: theme("colors.gray.800");
+    --colors-emphasized: theme("colors.gray.700");
+    --colors-inverted: theme("colors.gray.200");
+    --colors-solid: theme("colors.white");
+    --colors-focus-ring: theme("colors.gray.200");
+    --colors-error: theme("colors.red.400");
+    --colors-warning: theme("colors.orange.400");
+    --colors-success: theme("colors.green.400");
+    --colors-info: theme("colors.blue.400");
+    --colors-shadow-1: color-mix(in srgb, theme("colors.black") 64%, transparent);
+    --colors-shadow-2: inset color-mix(in srgb, theme("colors.gray.300") 30%, transparent);
+  }
+
+  :root {
+    --header-height: 64px;
+    --content-height: calc(100dvh - var(--header-height));
+    --font-quicksand: "Quicksand", sans-serif;
+  }
+
+  @media screen and (min-width: 48rem) {
+    :root {
+      --header-height: 104px;
+    }
+  }
+
+  html {
+    color: var(--colors-fg);
+    background: var(--colors-bg);
+    --bg-currentcolor: var(--colors-bg);
+    --bg-contrast: var(--colors-bg);
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    touch-action: manipulation;
+  }
+
+  body {
+    font-family: var(--font-quicksand);
+  }
+
+  *,
+  *::before,
+  *::after,
+  *::backdrop {
+    box-sizing: border-box;
+    border-width: 0px;
+    border-style: solid;
+    border-color: var(--colors-border, currentColor);
+  }
+
+  * {
+    margin: 0px;
+    padding: 0px;
+    font: inherit;
+    word-wrap: break-word;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  *:focus-visible {
+    @apply outline-none;
+    outline-color: var(--colors-focus-ring);
+  }
+
+  [role="group"][data-attached] {
+    & > :not(:last-of-type) {
+      @apply -me-px;
+    }
+
+    & > :first-of-type:not(:last-of-type) {
+      @apply rounded-tr-none rounded-br-none border-r-0;
+    }
+
+    & > :not(:first-of-type):not(:last-of-type) {
+      @apply rounded-none border-r-0;
+    }
+
+    & > :not(:first-of-type):last-of-type {
+      @apply rounded-tl-none rounded-bl-none;
+    }
+  }
+
+  @keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(3px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(3px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(1px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+  }
+  
+  .animate-shake {
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+}
