@@ -7,7 +7,7 @@ import { generateToken } from "./utils/jwt.js";
 // Helper function to simulate a delay in development environment
 const simulateDelay = async () => {
   if (process.env.NODE_ENV === "development") {
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 };
 
