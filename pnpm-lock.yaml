@@ -54,6 +54,9 @@ importers:
         specifier: ^3.24.2
         version: 3.24.2
     devDependencies:
+      '@faker-js/faker':
+        specifier: ^9.6.0
+        version: 9.6.0
       '@graphql-codegen/cli':
         specifier: ^5.0.5
         version: 5.0.5(@types/node@22.13.11)(graphql@16.10.0)(typescript@5.8.2)
@@ -857,6 +860,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@faker-js/faker@9.6.0':
+    resolution: {integrity: sha512-3vm4by+B5lvsFPSyep3ELWmZfE3kicDtmemVpuwl1yH7tqtnHdsA6hG8fbXedMVdkzgtvzWoRgjSB4Q+FHnZiw==}
+    engines: {node: '>=18.0.0', npm: '>=9.0.0'}
 
   '@graphql-codegen/add@5.0.3':
     resolution: {integrity: sha512-SxXPmramkth8XtBlAHu4H4jYcYXM/o3p01+psU+0NADQowA8jtYkK6MW5rV6T+CxkEaNZItfSmZRPgIuypcqnA==}
@@ -4420,6 +4427,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.25.1':
     optional: true
+
+  '@faker-js/faker@9.6.0': {}
 
   '@graphql-codegen/add@5.0.3(graphql@16.10.0)':
     dependencies:
