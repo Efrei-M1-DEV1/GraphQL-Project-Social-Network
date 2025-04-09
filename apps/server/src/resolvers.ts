@@ -224,5 +224,65 @@ export const resolvers: Resolvers = {
         },
       };
     },
+
+    likeArticle: async (_parent, { articleId }, context) => {
+      const userId = context.user?.id;
+      if (!userId) {
+        throw new Error("Unauthorized");
+      }
+
+      const like = await context.dataSources.db.like.create({
+        data: {
+          articleId,
+          userId,
+        },
+        include: {
+          user: true, // Inclure les données de l'utilisateur
+          article: {
+            include: {
+              author: true, // Inclure l'auteur de l'article
+            },
+          },
+        },
+      });
+
+      return {
+        ...like,
+        createdAt: like.createdAt.toISOString(),
+        user: {
+          ...like.user,
+          createdAt: like.user.createdAt.toISOString(),
+          updatedAt: like.user.updatedAt.toISOString(),
+        },
+        article: {
+          ...like.article,
+          createdAt: like.article.createdAt.toISOString(),
+          updatedAt: like.article.updatedAt.toISOString(),
+          author: {
+            ...like.article.author,
+            createdAt: like.article.author.createdAt.toISOString(),
+            updatedAt: like.article.author.updatedAt.toISOString(),
+          },
+        },
+      };
+    },
+    unlikeArticle: async (_parent, { articleId }, context: DataSourceContext): Promise<boolean> => {
+      await simulateDelay();
+      if (!context.user) {
+        throw new Error("Unauthorized: Please log in");
+      }
+
+      const existingLike = await context.dataSources.db.like.findFirst({
+        where: { userId: context.user.id, articleId },
+      });
+      if (!existingLike) {
+        throw new Error("Like not found");
+      }
+
+      await context.dataSources.db.like.delete({
+        where: { id: existingLike.id },
+      });
+      return true;
+    },
   },
 };

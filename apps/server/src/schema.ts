@@ -16,6 +16,14 @@ export const typeDefs = `#graphql
     updatedAt: String!
   }
 
+  type Like {
+    id: Int!
+    user: User!
+    article: Article!
+    createdAt: String!
+  }
+
+
   type AuthPayload {
     token: String!
     user: User!
@@ -35,5 +43,8 @@ export const typeDefs = `#graphql
     deleteArticle(id: Int!): Boolean!
     register(email: String!, password: String!, name: String!): AuthPayload!
     login(email: String!, password: String!): AuthPayload!
+
+    likeArticle(articleId: Int!): Like!
+    unlikeArticle(articleId: Int!): Boolean!
   }
 `;
