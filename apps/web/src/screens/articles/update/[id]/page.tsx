@@ -1,5 +1,5 @@
 import { graphql } from "@/gql";
-import type { GetArticleQuery, UpdateArticleMutation } from "@/gql/graphql";
+import type { ArticleQuery, UpdateArticleMutation } from "@/gql/graphql";
 import { useMutation, useQuery } from "@apollo/client";
 import { Card, CardBody, CardHeader, CardTitle } from "@repo/ui/data-display/card";
 import { Button } from "@repo/ui/form/button";
@@ -41,7 +41,7 @@ export default function ArticleUpdatePage() {
     data,
     loading: loadingQuery,
     error: errorQuery,
-  } = useQuery<GetArticleQuery>(GET_ARTICLE_QUERY, {
+  } = useQuery<ArticleQuery>(GET_ARTICLE_QUERY, {
     variables: { id: Number(id) },
   });
 

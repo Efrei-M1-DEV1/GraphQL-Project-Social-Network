@@ -17,6 +17,7 @@ const GET_ARTICLE = graphql(`
       title
       content
       createdAt
+      likeCount
       author {
         id
         name
@@ -88,7 +89,9 @@ function ArticleDetails(props: ArticleDetailsProps) {
           </Badge>
           <span className="flex-1" />
           <Icon as={LuStar} className="fill-yellow-400 text-yellow-400" />
-          <span className="text-gray-500 text-xs dark:text-gray-400">(120 Reviews)</span>
+          <span className="text-gray-500 text-xs dark:text-gray-400">
+            ({data.article.likeCount} {data.article.likeCount === 1 ? "like" : "likes"})
+          </span>
         </div>
       </CardHeader>
       <CardBody>

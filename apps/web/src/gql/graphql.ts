@@ -235,6 +235,7 @@ export type ArticleQuery = {
     title: string;
     content: string;
     createdAt: any;
+    likeCount?: number | null;
     author: { __typename?: "User"; id: number; name?: string | null };
   } | null;
 };
@@ -430,6 +431,7 @@ export const ArticleDocument = {
                 { kind: "Field", name: { kind: "Name", value: "title" } },
                 { kind: "Field", name: { kind: "Name", value: "content" } },
                 { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                { kind: "Field", name: { kind: "Name", value: "likeCount" } },
                 {
                   kind: "Field",
                   name: { kind: "Name", value: "author" },
