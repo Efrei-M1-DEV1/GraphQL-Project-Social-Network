@@ -48,6 +48,11 @@ export const resolvers: Resolvers = {
         where: { articleId: article.id },
       });
     },
+    likeCount: async (article, _args, context: DataSourceContext) => {
+      return context.dataSources.db.like.count({
+        where: { articleId: article.id },
+      });
+    },
   },
 
   Query: {
@@ -446,13 +451,11 @@ export const resolvers: Resolvers = {
         throw new Error(`Logout failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
-    likeArticle: async (_parent, { articleId }, context) => {
+    likeArticle: async (_parent, { articleId }, context: DataSourceContext) => {
+      await simulateDelay();
       const userId = context.user?.id;
       if (!userId) {
         throw new Error("Unauthorized: You must be logged in to like an article");
-      }
-      if (!articleId) {
-        throw new Error("Article ID is required");
       }
       const existingLike = await context.dataSources.db.like.findFirst({
         where: { userId, articleId },
@@ -460,28 +463,16 @@ export const resolvers: Resolvers = {
       if (existingLike) {
         throw new Error("You have already liked this article");
       }
-      const article = await context.dataSources.db.article.findUnique({
-        where: { id: articleId },
-        include: { likes: true },
-      });
-      if (!article) {
-        throw new Error("Article not found: The specified article does not exist");
+      const articleExists = await context.dataSources.db.article.count({ where: { id: articleId } });
+      if (articleExists === 0) {
+        throw new Error("Article not found");
       }
       const like = await context.dataSources.db.like.create({
         data: { articleId, userId },
         include: {
           user: true,
-          article: {
-            include: { author: true, comments: { include: { author: true } } },
-          },
+          article: { include: { author: true } },
         },
-      });
-      if (!like) {
-        throw new Error("Failed to like article");
-      }
-      await context.dataSources.db.article.update({
-        where: { id: articleId },
-        data: { likes: { connect: { id: like.id } } },
       });
       return like;
     },
@@ -494,7 +485,7 @@ export const resolvers: Resolvers = {
         where: { userId: context.user.id, articleId },
       });
       if (!existingLike) {
-        throw new Error("Like not found: You have not liked this article");
+        throw new Error("Like not found");
       }
       await context.dataSources.db.like.delete({ where: { id: existingLike.id } });
       return true;
