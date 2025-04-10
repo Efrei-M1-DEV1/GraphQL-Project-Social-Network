@@ -1,5 +1,5 @@
 import { graphql } from "@/gql";
-import type { CommentsByArticleQuery } from "@/gql/graphql";
+import type { CommentsByArticleQuery, CommentsByArticleQueryVariables } from "@/gql/graphql";
 import { useSuspenseQuery } from "@apollo/client";
 
 const GET_COMMENT = graphql(`
@@ -21,9 +21,9 @@ const GET_COMMENT = graphql(`
 `);
 
 export default function CommentDetails({ id }: { id: number }) {
-  const { data } = useSuspenseQuery<CommentsByArticleQuery>(GET_COMMENT, {
+  const { data } = useSuspenseQuery<CommentsByArticleQuery, CommentsByArticleQueryVariables>(GET_COMMENT, {
     variables: {
-      id,
+      articleId: id,
     },
   });
   const comments = data.commentsByArticle.edges.map((edge) => edge.node);

@@ -223,11 +223,11 @@ export type HelloQueryVariables = Exact<{ [key: string]: never }>;
 
 export type HelloQuery = { __typename?: "Query"; hello?: string | null };
 
-export type GetArticleQueryVariables = Exact<{
-  id: Scalars["Int"]["input"];
+export type ArticleQueryVariables = Exact<{
+  articleId: Scalars["Int"]["input"];
 }>;
 
-export type GetArticleQuery = {
+export type ArticleQuery = {
   __typename?: "Query";
   article?: {
     __typename?: "Article";
@@ -396,17 +396,17 @@ export const HelloDocument = {
     },
   ],
 } as unknown as DocumentNode<HelloQuery, HelloQueryVariables>;
-export const GetArticleDocument = {
+export const ArticleDocument = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "GetArticle" },
+      name: { kind: "Name", value: "Article" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
-          variable: { kind: "Variable", name: { kind: "Name", value: "id" } },
+          variable: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
         },
       ],
@@ -420,7 +420,7 @@ export const GetArticleDocument = {
               {
                 kind: "Argument",
                 name: { kind: "Name", value: "id" },
-                value: { kind: "Variable", name: { kind: "Name", value: "id" } },
+                value: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
               },
             ],
             selectionSet: {
@@ -448,7 +448,7 @@ export const GetArticleDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<GetArticleQuery, GetArticleQueryVariables>;
+} as unknown as DocumentNode<ArticleQuery, ArticleQueryVariables>;
 export const CreateArticleDocument = {
   kind: "Document",
   definitions: [

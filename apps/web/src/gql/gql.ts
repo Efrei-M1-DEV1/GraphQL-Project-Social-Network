@@ -16,7 +16,7 @@ import * as types from "./graphql";
 type Documents = {
   "\n  query CommentsByArticle($articleId: Int!) {\n  commentsByArticle(articleId: $articleId) {\n    edges {\n      node {\n        id\n        content\n        author {\n          id\n          name\n        }\n        createdAt\n      }\n    }\n  }\n}\n": typeof types.CommentsByArticleDocument;
   "\n  query Hello {\n    hello\n  }\n": typeof types.HelloDocument;
-  "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n": typeof types.GetArticleDocument;
+  "\n  query Article($articleId: Int!) {\n    article(id: $articleId) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n": typeof types.ArticleDocument;
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n": typeof types.CreateArticleDocument;
   "\n  query Articles($first: Int, $after: String) {\n    articles(first: $first, after: $after) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          content\n          createdAt\n          author {\n            name\n          }\n        }\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n  }\n": typeof types.ArticlesDocument;
   "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": typeof types.QueryDocument;
@@ -28,8 +28,8 @@ const documents: Documents = {
   "\n  query CommentsByArticle($articleId: Int!) {\n  commentsByArticle(articleId: $articleId) {\n    edges {\n      node {\n        id\n        content\n        author {\n          id\n          name\n        }\n        createdAt\n      }\n    }\n  }\n}\n":
     types.CommentsByArticleDocument,
   "\n  query Hello {\n    hello\n  }\n": types.HelloDocument,
-  "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n":
-    types.GetArticleDocument,
+  "\n  query Article($articleId: Int!) {\n    article(id: $articleId) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n":
+    types.ArticleDocument,
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n":
     types.CreateArticleDocument,
   "\n  query Articles($first: Int, $after: String) {\n    articles(first: $first, after: $after) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          content\n          createdAt\n          author {\n            name\n          }\n        }\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n  }\n":
@@ -71,8 +71,8 @@ export function graphql(source: "\n  query Hello {\n    hello\n  }\n"): (typeof 
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n",
-): (typeof documents)["\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n"];
+  source: "\n  query Article($articleId: Int!) {\n    article(id: $articleId) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n",
+): (typeof documents)["\n  query Article($articleId: Int!) {\n    article(id: $articleId) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */

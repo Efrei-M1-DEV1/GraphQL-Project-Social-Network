@@ -1,7 +1,7 @@
 import Comment from "@/components/comment";
 import { Skeleton } from "@/components/skeleton";
 import { graphql } from "@/gql";
-import type { GetArticleQuery } from "@/gql/graphql";
+import type { ArticleQuery, ArticleQueryVariables } from "@/gql/graphql";
 import { useSuspenseQuery } from "@apollo/client";
 import { Badge } from "@repo/ui/data-display/badge";
 import { Card, CardBody, CardDescription, CardHeader, CardTitle } from "@repo/ui/data-display/card";
@@ -11,8 +11,8 @@ import { LuStar } from "react-icons/lu";
 import { useNavigate } from "react-router";
 
 const GET_ARTICLE = graphql(`
-  query GetArticle($id: Int!) {
-    article(id: $id) {
+  query Article($articleId: Int!) {
+    article(id: $articleId) {
       id
       title
       content
@@ -60,9 +60,9 @@ type ArticleDetailsProps = {
 function ArticleDetails(props: ArticleDetailsProps) {
   const { id, navigate } = props;
 
-  const { error, data } = useSuspenseQuery<GetArticleQuery>(GET_ARTICLE, {
+  const { error, data } = useSuspenseQuery<ArticleQuery, ArticleQueryVariables>(GET_ARTICLE, {
     variables: {
-      id,
+      articleId: id,
     },
   });
 
