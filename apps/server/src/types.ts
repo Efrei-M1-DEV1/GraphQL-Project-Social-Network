@@ -1,143 +1,230 @@
-import { GraphQLResolveInfo } from 'graphql';
-import { DataSourceContext } from './context';
+import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from "graphql";
+import { DataSourceContext } from "./context";
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
 export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
 export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> = { [_ in K]?: never };
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
+export type Incremental<T> = T | { [P in keyof T]?: P extends " $fragmentName" | "__typename" ? T[P] : never };
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string; }
-  String: { input: string; output: string; }
-  Boolean: { input: boolean; output: boolean; }
-  Int: { input: number; output: number; }
-  Float: { input: number; output: number; }
+  ID: { input: string; output: string };
+  String: { input: string; output: string };
+  Boolean: { input: boolean; output: boolean };
+  Int: { input: number; output: number };
+  Float: { input: number; output: number };
+  DateTime: { input: any; output: any };
 };
 
 export type Article = {
-  __typename?: 'Article';
+  __typename?: "Article";
   author: User;
-  content: Scalars['String']['output'];
-  createdAt: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
-  title: Scalars['String']['output'];
-  updatedAt: Scalars['String']['output'];
+  commentCount?: Maybe<Scalars["Int"]["output"]>;
+  content: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["Int"]["output"];
+  title: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type ArticleConnection = {
+  __typename?: "ArticleConnection";
+  edges: Array<ArticleEdge>;
+  pageInfo: PageInfo;
+};
+
+export type ArticleEdge = {
+  __typename?: "ArticleEdge";
+  cursor: Scalars["String"]["output"];
+  node: Article;
 };
 
 export type AuthPayload = {
-  __typename?: 'AuthPayload';
-  token: Scalars['String']['output'];
+  __typename?: "AuthPayload";
+  refreshToken: Scalars["String"]["output"];
+  token: Scalars["String"]["output"];
+  user: User;
+};
+
+export type Comment = {
+  __typename?: "Comment";
+  article: Article;
+  author: User;
+  content: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["Int"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type CommentConnection = {
+  __typename?: "CommentConnection";
+  edges: Array<CommentEdge>;
+  pageInfo: PageInfo;
+};
+
+export type CommentEdge = {
+  __typename?: "CommentEdge";
+  cursor: Scalars["String"]["output"];
+  node: Comment;
+};
+
+export type Like = {
+  __typename?: "Like";
+  article: Article;
+  createdAt: Scalars["DateTime"]["output"];
+  id: Scalars["Int"]["output"];
   user: User;
 };
 
 export type Mutation = {
-  __typename?: 'Mutation';
+  __typename?: "Mutation";
   createArticle: Article;
-  deleteArticle: Scalars['Boolean']['output'];
+  createComment: Comment;
+  deleteArticle: Scalars["Boolean"]["output"];
+  deleteComment: Scalars["Boolean"]["output"];
+  likeArticle: Like;
   login: AuthPayload;
+  logout: Scalars["Boolean"]["output"];
   register: AuthPayload;
+  unlikeArticle: Scalars["Boolean"]["output"];
   updateArticle: Article;
+  updateComment: Comment;
 };
-
 
 export type MutationCreateArticleArgs = {
-  content: Scalars['String']['input'];
-  title: Scalars['String']['input'];
+  content: Scalars["String"]["input"];
+  title: Scalars["String"]["input"];
 };
 
+export type MutationCreateCommentArgs = {
+  articleId: Scalars["Int"]["input"];
+  content: Scalars["String"]["input"];
+};
 
 export type MutationDeleteArticleArgs = {
-  id: Scalars['Int']['input'];
+  id: Scalars["Int"]["input"];
 };
 
+export type MutationDeleteCommentArgs = {
+  id: Scalars["Int"]["input"];
+};
+
+export type MutationLikeArticleArgs = {
+  articleId: Scalars["Int"]["input"];
+};
 
 export type MutationLoginArgs = {
-  email: Scalars['String']['input'];
-  password: Scalars['String']['input'];
+  email: Scalars["String"]["input"];
+  password: Scalars["String"]["input"];
 };
 
+export type MutationLogoutArgs = {
+  refreshToken: Scalars["String"]["input"];
+};
 
 export type MutationRegisterArgs = {
-  email: Scalars['String']['input'];
-  name: Scalars['String']['input'];
-  password: Scalars['String']['input'];
+  email: Scalars["String"]["input"];
+  name: Scalars["String"]["input"];
+  password: Scalars["String"]["input"];
 };
 
+export type MutationUnlikeArticleArgs = {
+  articleId: Scalars["Int"]["input"];
+};
 
 export type MutationUpdateArticleArgs = {
-  content?: InputMaybe<Scalars['String']['input']>;
-  id: Scalars['Int']['input'];
-  title?: InputMaybe<Scalars['String']['input']>;
+  content?: InputMaybe<Scalars["String"]["input"]>;
+  id: Scalars["Int"]["input"];
+  title?: InputMaybe<Scalars["String"]["input"]>;
+};
+
+export type MutationUpdateCommentArgs = {
+  content: Scalars["String"]["input"];
+  id: Scalars["Int"]["input"];
+};
+
+export type PageInfo = {
+  __typename?: "PageInfo";
+  endCursor?: Maybe<Scalars["String"]["output"]>;
+  hasNextPage: Scalars["Boolean"]["output"];
 };
 
 export type Query = {
-  __typename?: 'Query';
+  __typename?: "Query";
   article?: Maybe<Article>;
-  articles: Array<Article>;
-  articlesByAuthor: Array<Article>;
-  hello?: Maybe<Scalars['String']['output']>;
+  articles: ArticleConnection;
+  articlesByAuthor: ArticleConnection;
+  commentsByArticle: CommentConnection;
+  hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
 
-
 export type QueryArticleArgs = {
-  id: Scalars['Int']['input'];
+  id: Scalars["Int"]["input"];
 };
-
 
 export type QueryArticlesArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
-
 
 export type QueryArticlesByAuthorArgs = {
-  after?: InputMaybe<Scalars['Int']['input']>;
-  authorId: Scalars['Int']['input'];
-  first?: InputMaybe<Scalars['Int']['input']>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  authorId: Scalars["Int"]["input"];
+  first?: InputMaybe<Scalars["Int"]["input"]>;
 };
+
+export type QueryCommentsByArticleArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  articleId: Scalars["Int"]["input"];
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  sort?: InputMaybe<SortOrder>;
+};
+
+export enum SortOrder {
+  Asc = "ASC",
+  Desc = "DESC",
+}
 
 export type User = {
-  __typename?: 'User';
-  createdAt: Scalars['String']['output'];
-  email: Scalars['String']['output'];
-  id: Scalars['Int']['output'];
-  name?: Maybe<Scalars['String']['output']>;
-  updatedAt: Scalars['String']['output'];
+  __typename?: "User";
+  createdAt: Scalars["DateTime"]["output"];
+  email: Scalars["String"]["output"];
+  id: Scalars["Int"]["output"];
+  name?: Maybe<Scalars["String"]["output"]>;
+  updatedAt: Scalars["DateTime"]["output"];
 };
 
-
-
 export type ResolverTypeWrapper<T> = Promise<T> | T;
-
 
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = {}, TContext = {}, TArgs = {}> =
+  | ResolverFn<TResult, TParent, TContext, TArgs>
+  | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Promise<TResult> | TResult;
 
 export type SubscriptionSubscribeFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => AsyncIterable<TResult> | Promise<AsyncIterable<TResult>>;
 
 export type SubscriptionResolveFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => TResult | Promise<TResult>;
 
 export interface SubscriptionSubscriberObject<TResult, TKey extends string, TParent, TContext, TArgs> {
@@ -161,10 +248,14 @@ export type SubscriptionResolver<TResult, TKey extends string, TParent = {}, TCo
 export type TypeResolveFn<TTypes, TParent = {}, TContext = {}> = (
   parent: TParent,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
 
-export type IsTypeOfResolverFn<T = {}, TContext = {}> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
+export type IsTypeOfResolverFn<T = {}, TContext = {}> = (
+  obj: T,
+  context: TContext,
+  info: GraphQLResolveInfo,
+) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
@@ -173,80 +264,240 @@ export type DirectiveResolverFn<TResult = {}, TParent = {}, TContext = {}, TArgs
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => TResult | Promise<TResult>;
-
-
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
   Article: ResolverTypeWrapper<Article>;
+  ArticleConnection: ResolverTypeWrapper<ArticleConnection>;
+  ArticleEdge: ResolverTypeWrapper<ArticleEdge>;
   AuthPayload: ResolverTypeWrapper<AuthPayload>;
-  Boolean: ResolverTypeWrapper<Scalars['Boolean']['output']>;
-  Int: ResolverTypeWrapper<Scalars['Int']['output']>;
+  Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
+  Comment: ResolverTypeWrapper<Comment>;
+  CommentConnection: ResolverTypeWrapper<CommentConnection>;
+  CommentEdge: ResolverTypeWrapper<CommentEdge>;
+  DateTime: ResolverTypeWrapper<Scalars["DateTime"]["output"]>;
+  Int: ResolverTypeWrapper<Scalars["Int"]["output"]>;
+  Like: ResolverTypeWrapper<Like>;
   Mutation: ResolverTypeWrapper<{}>;
+  PageInfo: ResolverTypeWrapper<PageInfo>;
   Query: ResolverTypeWrapper<{}>;
-  String: ResolverTypeWrapper<Scalars['String']['output']>;
+  SortOrder: SortOrder;
+  String: ResolverTypeWrapper<Scalars["String"]["output"]>;
   User: ResolverTypeWrapper<User>;
 };
 
 /** Mapping between all available schema types and the resolvers parents */
 export type ResolversParentTypes = {
   Article: Article;
+  ArticleConnection: ArticleConnection;
+  ArticleEdge: ArticleEdge;
   AuthPayload: AuthPayload;
-  Boolean: Scalars['Boolean']['output'];
-  Int: Scalars['Int']['output'];
+  Boolean: Scalars["Boolean"]["output"];
+  Comment: Comment;
+  CommentConnection: CommentConnection;
+  CommentEdge: CommentEdge;
+  DateTime: Scalars["DateTime"]["output"];
+  Int: Scalars["Int"]["output"];
+  Like: Like;
   Mutation: {};
+  PageInfo: PageInfo;
   Query: {};
-  String: Scalars['String']['output'];
+  String: Scalars["String"]["output"];
   User: User;
 };
 
-export type ArticleResolvers<ContextType = DataSourceContext, ParentType extends ResolversParentTypes['Article'] = ResolversParentTypes['Article']> = {
-  author?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
-  content?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+export type ArticleResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Article"] = ResolversParentTypes["Article"],
+> = {
+  author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  commentCount?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
+  content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  title?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type AuthPayloadResolvers<ContextType = DataSourceContext, ParentType extends ResolversParentTypes['AuthPayload'] = ResolversParentTypes['AuthPayload']> = {
-  token?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
+export type ArticleConnectionResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["ArticleConnection"] = ResolversParentTypes["ArticleConnection"],
+> = {
+  edges?: Resolver<Array<ResolversTypes["ArticleEdge"]>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes["PageInfo"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type MutationResolvers<ContextType = DataSourceContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
-  createArticle?: Resolver<ResolversTypes['Article'], ParentType, ContextType, RequireFields<MutationCreateArticleArgs, 'content' | 'title'>>;
-  deleteArticle?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteArticleArgs, 'id'>>;
-  login?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType, RequireFields<MutationLoginArgs, 'email' | 'password'>>;
-  register?: Resolver<ResolversTypes['AuthPayload'], ParentType, ContextType, RequireFields<MutationRegisterArgs, 'email' | 'name' | 'password'>>;
-  updateArticle?: Resolver<ResolversTypes['Article'], ParentType, ContextType, RequireFields<MutationUpdateArticleArgs, 'id'>>;
+export type ArticleEdgeResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["ArticleEdge"] = ResolversParentTypes["ArticleEdge"],
+> = {
+  cursor?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  node?: Resolver<ResolversTypes["Article"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type QueryResolvers<ContextType = DataSourceContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
-  article?: Resolver<Maybe<ResolversTypes['Article']>, ParentType, ContextType, RequireFields<QueryArticleArgs, 'id'>>;
-  articles?: Resolver<Array<ResolversTypes['Article']>, ParentType, ContextType, Partial<QueryArticlesArgs>>;
-  articlesByAuthor?: Resolver<Array<ResolversTypes['Article']>, ParentType, ContextType, RequireFields<QueryArticlesByAuthorArgs, 'authorId'>>;
-  hello?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  users?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
+export type AuthPayloadResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["AuthPayload"] = ResolversParentTypes["AuthPayload"],
+> = {
+  refreshToken?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  token?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
-export type UserResolvers<ContextType = DataSourceContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
-  createdAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
-  id?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
-  name?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
-  updatedAt?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
+export type CommentResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Comment"] = ResolversParentTypes["Comment"],
+> = {
+  article?: Resolver<ResolversTypes["Article"], ParentType, ContextType>;
+  author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CommentConnectionResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["CommentConnection"] = ResolversParentTypes["CommentConnection"],
+> = {
+  edges?: Resolver<Array<ResolversTypes["CommentEdge"]>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes["PageInfo"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CommentEdgeResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["CommentEdge"] = ResolversParentTypes["CommentEdge"],
+> = {
+  cursor?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  node?: Resolver<ResolversTypes["Comment"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export interface DateTimeScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes["DateTime"], any> {
+  name: "DateTime";
+}
+
+export type LikeResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Like"] = ResolversParentTypes["Like"],
+> = {
+  article?: Resolver<ResolversTypes["Article"], ParentType, ContextType>;
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  user?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type MutationResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Mutation"] = ResolversParentTypes["Mutation"],
+> = {
+  createArticle?: Resolver<
+    ResolversTypes["Article"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateArticleArgs, "content" | "title">
+  >;
+  createComment?: Resolver<
+    ResolversTypes["Comment"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationCreateCommentArgs, "articleId" | "content">
+  >;
+  deleteArticle?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationDeleteArticleArgs, "id">>;
+  deleteComment?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationDeleteCommentArgs, "id">>;
+  likeArticle?: Resolver<ResolversTypes["Like"], ParentType, ContextType, RequireFields<MutationLikeArticleArgs, "articleId">>;
+  login?: Resolver<
+    ResolversTypes["AuthPayload"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationLoginArgs, "email" | "password">
+  >;
+  logout?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationLogoutArgs, "refreshToken">>;
+  register?: Resolver<
+    ResolversTypes["AuthPayload"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationRegisterArgs, "email" | "name" | "password">
+  >;
+  unlikeArticle?: Resolver<
+    ResolversTypes["Boolean"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationUnlikeArticleArgs, "articleId">
+  >;
+  updateArticle?: Resolver<ResolversTypes["Article"], ParentType, ContextType, RequireFields<MutationUpdateArticleArgs, "id">>;
+  updateComment?: Resolver<
+    ResolversTypes["Comment"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationUpdateCommentArgs, "content" | "id">
+  >;
+};
+
+export type PageInfoResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["PageInfo"] = ResolversParentTypes["PageInfo"],
+> = {
+  endCursor?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  hasNextPage?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type QueryResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["Query"] = ResolversParentTypes["Query"],
+> = {
+  article?: Resolver<Maybe<ResolversTypes["Article"]>, ParentType, ContextType, RequireFields<QueryArticleArgs, "id">>;
+  articles?: Resolver<ResolversTypes["ArticleConnection"], ParentType, ContextType, Partial<QueryArticlesArgs>>;
+  articlesByAuthor?: Resolver<
+    ResolversTypes["ArticleConnection"],
+    ParentType,
+    ContextType,
+    RequireFields<QueryArticlesByAuthorArgs, "authorId">
+  >;
+  commentsByArticle?: Resolver<
+    ResolversTypes["CommentConnection"],
+    ParentType,
+    ContextType,
+    RequireFields<QueryCommentsByArticleArgs, "articleId">
+  >;
+  hello?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  users?: Resolver<Array<ResolversTypes["User"]>, ParentType, ContextType>;
+};
+
+export type UserResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["User"] = ResolversParentTypes["User"],
+> = {
+  createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  email?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  name?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
+  updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
 export type Resolvers<ContextType = DataSourceContext> = {
   Article?: ArticleResolvers<ContextType>;
+  ArticleConnection?: ArticleConnectionResolvers<ContextType>;
+  ArticleEdge?: ArticleEdgeResolvers<ContextType>;
   AuthPayload?: AuthPayloadResolvers<ContextType>;
+  Comment?: CommentResolvers<ContextType>;
+  CommentConnection?: CommentConnectionResolvers<ContextType>;
+  CommentEdge?: CommentEdgeResolvers<ContextType>;
+  DateTime?: GraphQLScalarType;
+  Like?: LikeResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;
+  PageInfo?: PageInfoResolvers<ContextType>;
   Query?: QueryResolvers<ContextType>;
   User?: UserResolvers<ContextType>;
 };
