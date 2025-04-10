@@ -88,6 +88,7 @@ export type Mutation = {
   likeArticle: Like;
   login: AuthPayload;
   logout: Scalars["Boolean"]["output"];
+  refreshToken: AuthPayload;
   register: AuthPayload;
   unlikeArticle: Scalars["Boolean"]["output"];
   updateArticle: Article;
@@ -123,6 +124,10 @@ export type MutationLoginArgs = {
 
 export type MutationLogoutArgs = {
   refreshToken: Scalars["String"]["input"];
+};
+
+export type MutationRefreshTokenArgs = {
+  token: Scalars["String"]["input"];
 };
 
 export type MutationRegisterArgs = {
@@ -223,6 +228,15 @@ export type HelloQueryVariables = Exact<{ [key: string]: never }>;
 
 export type HelloQuery = { __typename?: "Query"; hello?: string | null };
 
+export type RefreshTokenMutationVariables = Exact<{
+  token: Scalars["String"]["input"];
+}>;
+
+export type RefreshTokenMutation = {
+  __typename?: "Mutation";
+  refreshToken: { __typename?: "AuthPayload"; token: string; refreshToken: string };
+};
+
 export type ArticleQueryVariables = Exact<{
   articleId: Scalars["Int"]["input"];
 }>;
@@ -301,7 +315,7 @@ export type LoginMutationVariables = Exact<{
 
 export type LoginMutation = {
   __typename?: "Mutation";
-  login: { __typename?: "AuthPayload"; token: string; user: { __typename?: "User"; id: number; name?: string | null } };
+  login: { __typename?: "AuthPayload"; token: string; refreshToken: string };
 };
 
 export type RegisterMutationVariables = Exact<{
@@ -312,7 +326,7 @@ export type RegisterMutationVariables = Exact<{
 
 export type RegisterMutation = {
   __typename?: "Mutation";
-  register: { __typename?: "AuthPayload"; token: string; user: { __typename?: "User"; id: number; name?: string | null } };
+  register: { __typename?: "AuthPayload"; token: string; refreshToken: string };
 };
 
 export const CommentsByArticleDocument = {
@@ -396,6 +410,46 @@ export const HelloDocument = {
     },
   ],
 } as unknown as DocumentNode<HelloQuery, HelloQueryVariables>;
+export const RefreshTokenDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "RefreshToken" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "token" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "refreshToken" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "token" },
+                value: { kind: "Variable", name: { kind: "Name", value: "token" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "token" } },
+                { kind: "Field", name: { kind: "Name", value: "refreshToken" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<RefreshTokenMutation, RefreshTokenMutationVariables>;
 export const ArticleDocument = {
   kind: "Document",
   definitions: [
@@ -736,17 +790,7 @@ export const LoginDocument = {
               kind: "SelectionSet",
               selections: [
                 { kind: "Field", name: { kind: "Name", value: "token" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "user" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "id" } },
-                      { kind: "Field", name: { kind: "Name", value: "name" } },
-                    ],
-                  },
-                },
+                { kind: "Field", name: { kind: "Name", value: "refreshToken" } },
               ],
             },
           },
@@ -806,17 +850,7 @@ export const RegisterDocument = {
               kind: "SelectionSet",
               selections: [
                 { kind: "Field", name: { kind: "Name", value: "token" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "user" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "id" } },
-                      { kind: "Field", name: { kind: "Name", value: "name" } },
-                    ],
-                  },
-                },
+                { kind: "Field", name: { kind: "Name", value: "refreshToken" } },
               ],
             },
           },
