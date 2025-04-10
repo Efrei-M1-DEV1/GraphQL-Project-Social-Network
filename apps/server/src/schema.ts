@@ -1,6 +1,11 @@
 export const typeDefs = `#graphql
   scalar DateTime
 
+  enum SortOrder {
+    ASC
+    DESC
+  }
+
   type User {
     id: Int!
     email: String!
@@ -14,7 +19,7 @@ export const typeDefs = `#graphql
     title: String!
     content: String!
     author: User!
-    comments: [Comment!]!
+    commentCount: Int
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -30,6 +35,7 @@ export const typeDefs = `#graphql
     id: Int!
     content: String!
     author: User!
+    article: Article!
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -50,6 +56,16 @@ export const typeDefs = `#graphql
     cursor: String!
   }
 
+  type CommentConnection {
+    edges: [CommentEdge!]!
+    pageInfo: PageInfo!
+  }
+
+  type CommentEdge {
+    node: Comment!
+    cursor: String!
+  }
+
   type PageInfo {
     hasNextPage: Boolean!
     endCursor: String
@@ -61,6 +77,7 @@ export const typeDefs = `#graphql
     articles(first: Int, after: String): ArticleConnection!
     article(id: Int!): Article
     articlesByAuthor(authorId: Int!, first: Int, after: String): ArticleConnection!
+    commentsByArticle(articleId: Int!, first: Int, after: String, sort: SortOrder): CommentConnection!
   }
 
   type Mutation {
