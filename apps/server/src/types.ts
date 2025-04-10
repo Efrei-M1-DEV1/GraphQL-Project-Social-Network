@@ -21,7 +21,7 @@ export type Scalars = {
 export type Article = {
   __typename?: "Article";
   author: User;
-  comments: Array<Comment>;
+  commentCount?: Maybe<Scalars["Int"]["output"]>;
   content: Scalars["String"]["output"];
   createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
@@ -50,11 +50,24 @@ export type AuthPayload = {
 
 export type Comment = {
   __typename?: "Comment";
+  article: Article;
   author: User;
   content: Scalars["String"]["output"];
   createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
   updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type CommentConnection = {
+  __typename?: "CommentConnection";
+  edges: Array<CommentEdge>;
+  pageInfo: PageInfo;
+};
+
+export type CommentEdge = {
+  __typename?: "CommentEdge";
+  cursor: Scalars["String"]["output"];
+  node: Comment;
 };
 
 export type Like = {
@@ -143,6 +156,7 @@ export type Query = {
   article?: Maybe<Article>;
   articles: ArticleConnection;
   articlesByAuthor: ArticleConnection;
+  commentsByArticle: CommentConnection;
   hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
@@ -161,6 +175,18 @@ export type QueryArticlesByAuthorArgs = {
   authorId: Scalars["Int"]["input"];
   first?: InputMaybe<Scalars["Int"]["input"]>;
 };
+
+export type QueryCommentsByArticleArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  articleId: Scalars["Int"]["input"];
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  sort?: InputMaybe<SortOrder>;
+};
+
+export enum SortOrder {
+  Asc = "ASC",
+  Desc = "DESC",
+}
 
 export type User = {
   __typename?: "User";
@@ -249,12 +275,15 @@ export type ResolversTypes = {
   AuthPayload: ResolverTypeWrapper<AuthPayload>;
   Boolean: ResolverTypeWrapper<Scalars["Boolean"]["output"]>;
   Comment: ResolverTypeWrapper<Comment>;
+  CommentConnection: ResolverTypeWrapper<CommentConnection>;
+  CommentEdge: ResolverTypeWrapper<CommentEdge>;
   DateTime: ResolverTypeWrapper<Scalars["DateTime"]["output"]>;
   Int: ResolverTypeWrapper<Scalars["Int"]["output"]>;
   Like: ResolverTypeWrapper<Like>;
   Mutation: ResolverTypeWrapper<{}>;
   PageInfo: ResolverTypeWrapper<PageInfo>;
   Query: ResolverTypeWrapper<{}>;
+  SortOrder: SortOrder;
   String: ResolverTypeWrapper<Scalars["String"]["output"]>;
   User: ResolverTypeWrapper<User>;
 };
@@ -267,6 +296,8 @@ export type ResolversParentTypes = {
   AuthPayload: AuthPayload;
   Boolean: Scalars["Boolean"]["output"];
   Comment: Comment;
+  CommentConnection: CommentConnection;
+  CommentEdge: CommentEdge;
   DateTime: Scalars["DateTime"]["output"];
   Int: Scalars["Int"]["output"];
   Like: Like;
@@ -282,7 +313,7 @@ export type ArticleResolvers<
   ParentType extends ResolversParentTypes["Article"] = ResolversParentTypes["Article"],
 > = {
   author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
-  comments?: Resolver<Array<ResolversTypes["Comment"]>, ParentType, ContextType>;
+  commentCount?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
   content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
@@ -323,11 +354,30 @@ export type CommentResolvers<
   ContextType = DataSourceContext,
   ParentType extends ResolversParentTypes["Comment"] = ResolversParentTypes["Comment"],
 > = {
+  article?: Resolver<ResolversTypes["Article"], ParentType, ContextType>;
   author?: Resolver<ResolversTypes["User"], ParentType, ContextType>;
   content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CommentConnectionResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["CommentConnection"] = ResolversParentTypes["CommentConnection"],
+> = {
+  edges?: Resolver<Array<ResolversTypes["CommentEdge"]>, ParentType, ContextType>;
+  pageInfo?: Resolver<ResolversTypes["PageInfo"], ParentType, ContextType>;
+  __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
+};
+
+export type CommentEdgeResolvers<
+  ContextType = DataSourceContext,
+  ParentType extends ResolversParentTypes["CommentEdge"] = ResolversParentTypes["CommentEdge"],
+> = {
+  cursor?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
+  node?: Resolver<ResolversTypes["Comment"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
 };
 
@@ -414,6 +464,12 @@ export type QueryResolvers<
     ContextType,
     RequireFields<QueryArticlesByAuthorArgs, "authorId">
   >;
+  commentsByArticle?: Resolver<
+    ResolversTypes["CommentConnection"],
+    ParentType,
+    ContextType,
+    RequireFields<QueryCommentsByArticleArgs, "articleId">
+  >;
   hello?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   users?: Resolver<Array<ResolversTypes["User"]>, ParentType, ContextType>;
 };
@@ -436,6 +492,8 @@ export type Resolvers<ContextType = DataSourceContext> = {
   ArticleEdge?: ArticleEdgeResolvers<ContextType>;
   AuthPayload?: AuthPayloadResolvers<ContextType>;
   Comment?: CommentResolvers<ContextType>;
+  CommentConnection?: CommentConnectionResolvers<ContextType>;
+  CommentEdge?: CommentEdgeResolvers<ContextType>;
   DateTime?: GraphQLScalarType;
   Like?: LikeResolvers<ContextType>;
   Mutation?: MutationResolvers<ContextType>;

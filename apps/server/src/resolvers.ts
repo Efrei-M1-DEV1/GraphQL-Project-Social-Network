@@ -1,5 +1,7 @@
 import type { RefreshToken } from "@prisma/client";
+import { createArticleSchema } from "@repo/utils/schemas/article";
 import { loginSchema, registerSchema } from "@repo/utils/schemas/auth";
+import { createCommentSchema, updateCommentSchema } from "@repo/utils/schemas/comment";
 import { cursorSchema } from "@repo/utils/schemas/cursor";
 import bcrypt from "bcrypt";
 import { DateTimeResolver } from "graphql-scalars";
@@ -7,14 +9,18 @@ import type { DataSourceContext } from "./context";
 import type { Resolvers } from "./types";
 import { generateRefreshToken, generateToken, verifyRefreshToken } from "./utils/jwt.js";
 
-// Add this interface to define the cursor structure
 type ArticleCursor = {
   createdAt: string;
   id: number;
 };
 
+type CommentCursor = {
+  createdAt: string;
+  id: number;
+};
+
 // Helper function to parse and validate the cursor
-const parseCursor = (after: string): ArticleCursor | null => {
+const parseCursor = (after: string): ArticleCursor | CommentCursor | null => {
   try {
     const decoded = Buffer.from(after, "base64").toString("utf-8");
     const cursor = cursorSchema.parse(JSON.parse(decoded));
@@ -36,6 +42,14 @@ const simulateDelay = async () => {
 export const resolvers: Resolvers = {
   DateTime: DateTimeResolver,
 
+  Article: {
+    commentCount: async (article, _args, context: DataSourceContext) => {
+      return context.dataSources.db.comment.count({
+        where: { articleId: article.id },
+      });
+    },
+  },
+
   Query: {
     hello: async () => {
       await simulateDelay();
@@ -47,20 +61,26 @@ export const resolvers: Resolvers = {
     },
     article: async (_parent, { id }, context: DataSourceContext) => {
       await simulateDelay();
-      return context.dataSources.db.article.findUnique({
+      const article = await context.dataSources.db.article.findUnique({
         where: { id },
-        include: { author: true, comments: { include: { author: true } } },
+        include: { author: true },
       });
+      if (!article) {
+        throw new Error(`Article not found: Article with ID ${id} does not exist`);
+      }
+      return article;
     },
     articles: async (_parent, { first, after }, context: DataSourceContext) => {
       await simulateDelay();
       const take = first || 10;
 
+      // Validate cursor
       const cursor = after ? parseCursor(after) : null;
       if (after && !cursor) {
-        throw new Error("Invalid cursor provided");
+        throw new Error("Invalid cursor provided: The provided cursor is not valid");
       }
 
+      // Construct the where clause based on the cursor
       const where = cursor
         ? {
             OR: [
@@ -74,12 +94,14 @@ export const resolvers: Resolvers = {
         take: take + 1,
         where,
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        include: { author: true, comments: { include: { author: true } } },
+        include: { author: true },
       });
 
+      // Check if there are more articles
       const hasNextPage = articles.length > take;
+      // If there are more articles, slice the array to return only the requested number
       const nodes = hasNextPage ? articles.slice(0, take) : articles;
-
+      // Map the articles to edges
       const edges = nodes.map((article) => ({
         cursor: Buffer.from(
           JSON.stringify({
@@ -102,11 +124,19 @@ export const resolvers: Resolvers = {
       await simulateDelay();
       const take = first || 10;
 
-      const cursor = after ? parseCursor(after) : null;
-      if (after && !cursor) {
-        throw new Error("Invalid cursor provided");
+      // Validate authorId
+      const author = await context.dataSources.db.user.findUnique({ where: { id: authorId } });
+      if (!author) {
+        throw new Error(`Author not found: User with ID ${authorId} does not exist`);
       }
 
+      // Validate cursor
+      const cursor = after ? parseCursor(after) : null;
+      if (after && !cursor) {
+        throw new Error("Invalid cursor provided: The provided cursor is not valid");
+      }
+
+      // Construct the where clause based on the cursor
       const where = {
         authorId,
         ...(cursor
@@ -123,12 +153,14 @@ export const resolvers: Resolvers = {
         take: take + 1,
         where,
         orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        include: { author: true, comments: { include: { author: true } } },
+        include: { author: true },
       });
 
+      // Check if there are more articles
       const hasNextPage = articles.length > take;
+      // If there are more articles, slice the array to return only the requested number
       const nodes = hasNextPage ? articles.slice(0, take) : articles;
-
+      // Map the articles to edges
       const edges = nodes.map((article) => ({
         cursor: Buffer.from(
           JSON.stringify({
@@ -147,77 +179,165 @@ export const resolvers: Resolvers = {
         },
       };
     },
+    commentsByArticle: async (_parent, { articleId, first, after, sort }, context: DataSourceContext) => {
+      await simulateDelay();
+      const take = first || 10;
+
+      // Validate the article exists
+      const article = await context.dataSources.db.article.findUnique({ where: { id: articleId } });
+      if (!article) {
+        throw new Error("Article not found");
+      }
+
+      // Validate cursor
+      const cursor = after ? parseCursor(after) : null;
+      if (after && !cursor) {
+        throw new Error("Invalid cursor provided");
+      }
+
+      // Construct the where clause based on the cursor
+      const where = {
+        articleId,
+        ...(cursor
+          ? {
+              OR: [
+                { createdAt: { lt: new Date(cursor.createdAt) } },
+                { createdAt: { equals: new Date(cursor.createdAt) }, id: { lt: cursor.id } },
+              ],
+            }
+          : {}),
+      };
+
+      // Determine the order direction based on the sort argument
+      const orderDirection = sort === "ASC" ? "asc" : "desc";
+
+      const comments = await context.dataSources.db.comment.findMany({
+        take: take + 1,
+        where,
+        orderBy: [{ createdAt: orderDirection }, { id: orderDirection }],
+        include: { author: true, article: { include: { author: true } } },
+      });
+
+      // Check if there are more comments
+      const hasNextPage = comments.length > take;
+      // If there are more comments, slice the array to return only the requested number
+      const nodes = hasNextPage ? comments.slice(0, take) : comments;
+      // Map the comments to edges
+      const edges = nodes.map((comment) => ({
+        cursor: Buffer.from(
+          JSON.stringify({
+            createdAt: comment.createdAt.toISOString(),
+            id: comment.id,
+          }),
+        ).toString("base64"),
+        node: comment,
+      }));
+
+      return {
+        edges,
+        pageInfo: {
+          hasNextPage,
+          endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+        },
+      };
+    },
   },
   Mutation: {
     createArticle: async (_parent, { title, content }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in");
+        throw new Error("Unauthorized: You must be logged in to create an article");
       }
+
+      const parsed = createArticleSchema.safeParse({ title, content });
+
+      if (!parsed.success) {
+        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+      }
+
       const article = await context.dataSources.db.article.create({
-        data: { title, content, authorId: context.user.id },
+        data: { title: parsed.data.title, content: parsed.data.content, authorId: context.user.id },
         include: { author: true },
       });
-      return { ...article, comments: [] };
+      return article;
     },
     updateArticle: async (_parent, { id, title, content }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in");
+        throw new Error("Unauthorized: You must be logged in to update an article");
       }
       const article = await context.dataSources.db.article.findUnique({ where: { id } });
       if (!article) {
-        throw new Error("Article not found");
+        throw new Error(`Article not found: Article with ID ${id} does not exist`);
       }
       if (article.authorId !== context.user.id) {
-        throw new Error("Forbidden: You can only update your own articles");
+        throw new Error("Forbidden: You can only update articles that you created");
       }
       return context.dataSources.db.article.update({
         where: { id },
         data: { title: title ?? undefined, content: content ?? undefined },
-        include: { author: true, comments: { include: { author: true } } },
+        include: { author: true },
       });
     },
     deleteArticle: async (_parent, { id }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in");
+        throw new Error("Unauthorized: You must be logged in to delete an article");
       }
       const article = await context.dataSources.db.article.findUnique({ where: { id } });
       if (!article) {
-        throw new Error("Article not found");
+        throw new Error(`Article not found: Article with ID ${id} does not exist`);
       }
       if (article.authorId !== context.user.id) {
-        throw new Error("Forbidden: You can only delete your own articles");
+        throw new Error("Forbidden: You can only delete articles that you created");
       }
+
+      const commentCount = await context.dataSources.db.comment.count({ where: { articleId: id } });
       await context.dataSources.db.article.delete({ where: { id } });
       return true;
     },
-    createComment: async (_parent, { content, articleId }, context: DataSourceContext) => {
+    createComment: async (_parent, args, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in");
+        throw new Error("Unauthorized: You must be logged in to create a comment");
       }
+
+      // Validate input
+      const parsed = createCommentSchema.safeParse(args);
+      if (!parsed.success) {
+        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+      }
+      const { content, articleId } = parsed.data;
+
       const article = await context.dataSources.db.article.findUnique({ where: { id: articleId } });
       if (!article) {
-        throw new Error("Article not found");
+        throw new Error("Article not found: The specified article does not exist");
       }
+
       return context.dataSources.db.comment.create({
         data: { content, articleId, authorId: context.user.id },
-        include: { author: true, article: true },
+        include: { author: true, article: { include: { author: true } } },
       });
     },
-    updateComment: async (_parent, { id, content }: { id: number; content: string }, context: DataSourceContext) => {
+    updateComment: async (_parent, args, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in");
+        throw new Error("Unauthorized: You must be logged in to update a comment");
       }
+
+      // Validate input
+      const parsed = updateCommentSchema.safeParse(args);
+      if (!parsed.success) {
+        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+      }
+      const { id, content } = parsed.data;
+
       const comment = await context.dataSources.db.comment.findUnique({
         where: { id },
         include: { author: true },
       });
       if (!comment) {
-        throw new Error("Comment not found");
+        throw new Error("Comment not found: The specified comment does not exist");
       }
       if (comment.authorId !== context.user.id) {
         throw new Error("Forbidden: You can only update your own comments");
@@ -225,17 +345,20 @@ export const resolvers: Resolvers = {
       return context.dataSources.db.comment.update({
         where: { id },
         data: { content },
-        include: { author: true, article: true },
+        include: { author: true, article: { include: { author: true } } },
       });
     },
     deleteComment: async (_parent, { id }: { id: number }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in");
+        throw new Error("Unauthorized: You must be logged in to delete a comment");
       }
-      const comment = await context.dataSources.db.comment.findUnique({ where: { id } });
+      const comment = await context.dataSources.db.comment.findUnique({
+        where: { id },
+        include: { author: true },
+      });
       if (!comment) {
-        throw new Error("Comment not found");
+        throw new Error("Comment not found: The specified comment does not exist");
       }
       if (comment.authorId !== context.user.id) {
         throw new Error("Forbidden: You can only delete your own comments");
@@ -288,22 +411,19 @@ export const resolvers: Resolvers = {
     logout: async (_parent, { refreshToken }, context: DataSourceContext): Promise<boolean> => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in to log out");
+        throw new Error("Unauthorized: You must be logged in to log out");
       }
       if (!refreshToken) {
         throw new Error("Refresh token required");
       }
 
       try {
-        // NEW: Verify this is actually a valid refresh token
         verifyRefreshToken(refreshToken);
 
-        // Find all refresh tokens for the user
         const userRefreshTokens = await context.dataSources.db.refreshToken.findMany({
           where: { userId: context.user.id },
         });
 
-        // Check if the provided refresh token matches any of the stored hashed tokens
         let matchedToken: RefreshToken | null = null;
         for (const storedToken of userRefreshTokens) {
           const isMatch = await bcrypt.compare(refreshToken, storedToken.token);
@@ -317,7 +437,6 @@ export const resolvers: Resolvers = {
           throw new Error("Invalid refresh token");
         }
 
-        // Delete the matched refresh token
         await context.dataSources.db.refreshToken.delete({
           where: { id: matchedToken.id },
         });
@@ -330,7 +449,7 @@ export const resolvers: Resolvers = {
     likeArticle: async (_parent, { articleId }, context) => {
       const userId = context.user?.id;
       if (!userId) {
-        throw new Error("Unauthorized");
+        throw new Error("Unauthorized: You must be logged in to like an article");
       }
       if (!articleId) {
         throw new Error("Article ID is required");
@@ -346,7 +465,7 @@ export const resolvers: Resolvers = {
         include: { likes: true },
       });
       if (!article) {
-        throw new Error("Article not found");
+        throw new Error("Article not found: The specified article does not exist");
       }
       const like = await context.dataSources.db.like.create({
         data: { articleId, userId },
@@ -369,13 +488,13 @@ export const resolvers: Resolvers = {
     unlikeArticle: async (_parent, { articleId }, context: DataSourceContext): Promise<boolean> => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: Please log in");
+        throw new Error("Unauthorized: You must be logged in to unlike an article");
       }
       const existingLike = await context.dataSources.db.like.findFirst({
         where: { userId: context.user.id, articleId },
       });
       if (!existingLike) {
-        throw new Error("Like not found");
+        throw new Error("Like not found: You have not liked this article");
       }
       await context.dataSources.db.like.delete({ where: { id: existingLike.id } });
       return true;
