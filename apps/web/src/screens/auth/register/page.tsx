@@ -17,10 +17,7 @@ const SIGN_UP = graphql(`
   mutation Register($email: String!, $password: String!, $name: String!) {
     register(email: $email, password: $password, name: $name) {
       token
-      user {
-        id
-        name
-      }
+      refreshToken
     }
   }
 `);
@@ -43,10 +40,13 @@ export default function RegisterPage() {
 
   useEffect(() => {
     const handleRegisterSuccess = async () => {
-      if (data?.register?.token) {
+      if (data?.register) {
         await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate a delay
-        const token = data?.register?.token;
+
+        // Store both token and refreshToken
+        const { token, refreshToken } = data.register;
         localStorage.setItem("token", token || "");
+        localStorage.setItem("refreshToken", refreshToken || "");
 
         navigate("/");
       }
@@ -142,7 +142,7 @@ export default function RegisterPage() {
                     <>
                       Register successful! Please wait... <RefreshSpinner />
                     </>
-                  ) : getError("name") && getError("name") ? (
+                  ) : getError("name") && getError("message") ? (
                     `${getError("name")}: ${getError("message")}`
                   ) : null}
                 </span>
