@@ -46,6 +46,8 @@ model Comment {
   articleId Int
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([articleId])
 }
 
 model Like {
