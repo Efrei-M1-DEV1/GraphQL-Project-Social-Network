@@ -1,26 +1,43 @@
 import { Link } from "@/components/link";
 import { RefreshSpinner } from "@/components/refresh-spinner";
 import { graphql } from "@/gql";
-import type { ArticlesQuery } from "@/gql/graphql";
+import { gql } from "@apollo/client";
 import { useMutation, useSuspenseQuery } from "@apollo/client";
 import { Card, CardBody, CardFooter, CardHeader, CardTitle } from "@repo/ui/data-display/card";
 import { Button } from "@repo/ui/form/button";
 
 import { Heading } from "@repo/ui/typography/heading";
 import { Suspense } from "react";
-import { FiTrash2 } from "react-icons/fi";
-
-const GET_ARTICLES = graphql(`
-  query Articles($first: Int, $after: Int) {
-    articles(first: $first, after: $after) {
-      id,
-      title
-      content
-    }
-  }
-`);
+import { FaTrashAlt } from "react-icons/fa";
 
 import type { TypedDocumentNode } from "@apollo/client";
+
+// Correct the ArticlesQuery type
+interface ArticlesQuery {
+  articles: {
+    edges: {
+      node: {
+        id: number;
+        title: string;
+        content: string;
+      };
+    }[];
+  };
+}
+
+const GET_ARTICLES = gql`
+  query Articles($first: Int, $after: String) {
+    articles(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          title
+          content
+        }
+      }
+    }
+  }
+`;
 
 const DELETE_ARTICLE = graphql(`
   mutation DeleteArticle($deleteArticleId: Int!) {
@@ -45,14 +62,14 @@ export function ArticleList() {
     errorPolicy: "all",
     variables: {
       first: 10,
-      after: 0,
+      after: null,
     },
   });
 
   const [deleteArticle, { loading: deleting }] = useMutation(DELETE_ARTICLE, {
     onCompleted: () => {
       alert("Article supprimé avec succès !");
-      refetch(); // Rafraîchit la liste des articles après suppression
+      refetch(); // Refresh the list of articles after deletion
     },
     onError: (err) => {
       alert(`Erreur lors de la suppression : ${err.message}`);
@@ -69,13 +86,13 @@ export function ArticleList() {
     return <p>Error loading articles: {error.message}</p>;
   }
 
-  if (!data?.articles || data.articles.length === 0) {
+  if (!data?.articles?.edges || data.articles.edges.length === 0) {
     return <p>No articles found.</p>;
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {data.articles.map((article) => (
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-1 lg:grid-cols-2">
+      {data.articles.edges.map(({ node: article }) => (
         <Card key={article.id}>
           <CardHeader>
             <CardTitle>{article.title}</CardTitle>
@@ -90,12 +107,12 @@ export function ArticleList() {
               </Link>
             </Button>
             <Button
-              className="bg-red-500 text-white hover:bg-red-600"
+              className="bg-white-500 text-red-500 hover:bg-red-600 hover:text-white"
               onClick={() => handleDelete(article.id)}
               disabled={deleting}
             >
-              <FiTrash2 className="mr-1 inline-block" />
-              {deleting ? "Deleting..." : "Trash"}
+              <FaTrashAlt className="mr-1 inline-block" />
+              {deleting ? "Deleting..." : "Delete"}
             </Button>
           </CardFooter>
         </Card>
