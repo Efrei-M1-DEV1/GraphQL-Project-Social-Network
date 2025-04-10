@@ -24,6 +24,7 @@ const GET_ARTICLES = graphql(`
           id
           title
           content
+          likeCount
           createdAt
           author {
             name
@@ -126,8 +127,9 @@ export function ArticleList() {
     }
   };
 
-  // Get the first article for featured display
-  const featuredArticle = data.articles.edges[0]?.node;
+  const sortedArticles = [...data.articles.edges].sort((a, b) => (b.node.likeCount ?? 0) - (a.node.likeCount ?? 0));
+
+  const featuredArticle = sortedArticles[0]?.node;
 
   return (
     <div className="space-y-8">
