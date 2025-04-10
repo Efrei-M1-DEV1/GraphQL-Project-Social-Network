@@ -20,6 +20,7 @@ export const typeDefs = `#graphql
     content: String!
     author: User!
     commentCount: Int
+    likeCount: Int
     createdAt: DateTime!
     updatedAt: DateTime!
   }
