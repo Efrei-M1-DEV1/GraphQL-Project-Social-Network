@@ -35,7 +35,7 @@ export default function ArticleDetailsPage(props: { params?: { id: string } }) {
   }
 
   return (
-    <div className="mx-auto max-w-screen-md">
+    <div className="mx-auto mt-8 max-w-screen-md px-4">
       <Card>
         <Suspense fallback={<ArticleDetailsFallback />}>
           <ArticleDetails id={+id} navigate={navigate} />
