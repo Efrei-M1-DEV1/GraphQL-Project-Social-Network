@@ -451,6 +451,55 @@ export const resolvers: Resolvers = {
         throw new Error(`Logout failed: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
+    refreshToken: async (_parent, { token }, context: DataSourceContext) => {
+      await simulateDelay();
+      if (!context.user) {
+        throw new Error("Unauthorized: You must be logged in to refresh the token");
+      }
+      if (!token) {
+        throw new Error("Refresh token required");
+      }
+
+      try {
+        const userRefreshTokens = await context.dataSources.db.refreshToken.findMany({
+          where: { userId: context.user.id },
+        });
+
+        let matchedToken: RefreshToken | null = null;
+        for (const storedToken of userRefreshTokens) {
+          const isMatch = await bcrypt.compare(token, storedToken.token);
+          if (isMatch) {
+            matchedToken = storedToken;
+            break;
+          }
+        }
+
+        if (!matchedToken) {
+          throw new Error("Invalid refresh token");
+        }
+
+        const user = await context.dataSources.db.user.findUnique({
+          where: { id: context.user.id },
+        });
+
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        const newToken = generateToken(context.user.id);
+        const newRefreshToken = generateRefreshToken(context.user.id);
+        const hashedNewRefreshToken = await bcrypt.hash(newRefreshToken, 10);
+
+        await context.dataSources.db.refreshToken.update({
+          where: { id: matchedToken.id },
+          data: { token: hashedNewRefreshToken },
+        });
+
+        return { token: newToken, refreshToken: newRefreshToken, user };
+      } catch (error) {
+        throw new Error(`Failed to refresh token: ${error instanceof Error ? error.message : "Unknown error"}`);
+      }
+    },
     likeArticle: async (_parent, { articleId }, context: DataSourceContext) => {
       await simulateDelay();
       const userId = context.user?.id;

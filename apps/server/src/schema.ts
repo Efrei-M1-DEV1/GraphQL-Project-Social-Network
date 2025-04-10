@@ -93,5 +93,6 @@ export const typeDefs = `#graphql
     updateComment(id: Int!, content: String!): Comment!
     deleteComment(id: Int!): Boolean!
     logout(refreshToken: String!): Boolean!
+    refreshToken(token: String!): AuthPayload!
   }
 `;

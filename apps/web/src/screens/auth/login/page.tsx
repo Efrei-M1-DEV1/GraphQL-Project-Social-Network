@@ -17,10 +17,7 @@ const SIGN_IN = graphql(`
   mutation Login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
       token
-      user {
-        id
-        name
-      }
+      refreshToken
     }
   }
 `);
@@ -43,10 +40,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     const handleLoginSuccess = async () => {
-      if (data?.login?.token) {
+      if (data?.login) {
         await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate a delay
-        const token = data?.login?.token;
+
+        // Store both token and refreshToken
+        const { token, refreshToken } = data.login;
         localStorage.setItem("token", token || "");
+        localStorage.setItem("refreshToken", refreshToken || "");
 
         navigate("/");
       }

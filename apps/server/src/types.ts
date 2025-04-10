@@ -88,6 +88,7 @@ export type Mutation = {
   likeArticle: Like;
   login: AuthPayload;
   logout: Scalars["Boolean"]["output"];
+  refreshToken: AuthPayload;
   register: AuthPayload;
   unlikeArticle: Scalars["Boolean"]["output"];
   updateArticle: Article;
@@ -123,6 +124,10 @@ export type MutationLoginArgs = {
 
 export type MutationLogoutArgs = {
   refreshToken: Scalars["String"]["input"];
+};
+
+export type MutationRefreshTokenArgs = {
+  token: Scalars["String"]["input"];
 };
 
 export type MutationRegisterArgs = {
@@ -424,6 +429,12 @@ export type MutationResolvers<
     RequireFields<MutationLoginArgs, "email" | "password">
   >;
   logout?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationLogoutArgs, "refreshToken">>;
+  refreshToken?: Resolver<
+    ResolversTypes["AuthPayload"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationRefreshTokenArgs, "token">
+  >;
   register?: Resolver<
     ResolversTypes["AuthPayload"],
     ParentType,
