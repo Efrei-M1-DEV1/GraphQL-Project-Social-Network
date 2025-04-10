@@ -185,6 +185,12 @@ export type ArticlesQuery = {
   articles: Array<{ __typename?: "Article"; id: number; title: string; content: string }>;
 };
 
+export type DeleteArticleMutationVariables = Exact<{
+  deleteArticleId: Scalars["Int"]["input"];
+}>;
+
+export type DeleteArticleMutation = { __typename?: "Mutation"; deleteArticle: boolean };
+
 export type QueryQueryVariables = Exact<{
   id: Scalars["Int"]["input"];
 }>;
@@ -395,6 +401,39 @@ export const ArticlesDocument = {
     },
   ],
 } as unknown as DocumentNode<ArticlesQuery, ArticlesQueryVariables>;
+export const DeleteArticleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "DeleteArticle" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "deleteArticleId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "deleteArticle" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "deleteArticleId" } },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteArticleMutation, DeleteArticleMutationVariables>;
 export const QueryDocument = {
   kind: "Document",
   definitions: [
