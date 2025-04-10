@@ -31,6 +31,8 @@ const documents: Documents = {
     types.CreateArticleDocument,
   "\n  query Articles($first: Int, $after: String) {\n    articles(first: $first, after: $after) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          content\n          author {\n            id\n            email\n            name\n            createdAt\n            updatedAt\n          }\n          commentCount\n          createdAt\n          updatedAt\n        }\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n  }\n":
     types.ArticlesDocument,
+  "\n  mutation DeleteArticle($deleteArticleId: Int!) {\n    deleteArticle(id: $deleteArticleId)\n  }\n":
+    types.DeleteArticleDocument,
   "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": types.QueryDocument,
   "\n  mutation UpdateArticle($id: Int!, $title: String!, $content: String!) {\n    updateArticle(id: $id, title: $title, content: $content) {\n      id\n      title\n      content\n    }\n  }\n":
     types.UpdateArticleDocument,

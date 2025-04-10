@@ -39,6 +39,14 @@ const GET_ARTICLES = graphql(`
   }
 `);
 
+import type { TypedDocumentNode } from "@apollo/client";
+
+const DELETE_ARTICLE = graphql(`
+  mutation DeleteArticle($deleteArticleId: Int!) {
+    deleteArticle(id: $deleteArticleId)
+  }
+`) as TypedDocumentNode<{ deleteArticle: boolean }, { deleteArticleId: number }>;
+
 export default function ArticlesPage() {
   return (
     <div className="space-y-2">
