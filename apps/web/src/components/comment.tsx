@@ -20,10 +20,10 @@ const GET_COMMENT = graphql(`
 }
 `);
 
-export default function CommentDetails({ id }: { id: number }) {
+export default function CommentDetails({ articleId }: { articleId: number }) {
   const { data } = useSuspenseQuery<CommentsByArticleQuery, CommentsByArticleQueryVariables>(GET_COMMENT, {
     variables: {
-      articleId: id,
+      articleId,
     },
   });
   const comments = data.commentsByArticle.edges.map((edge) => edge.node);
