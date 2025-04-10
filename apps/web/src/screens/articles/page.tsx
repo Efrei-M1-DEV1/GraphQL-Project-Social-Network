@@ -47,7 +47,7 @@ const DELETE_ARTICLE = graphql(`
 
 export default function ArticlesPage() {
   return (
-    <div className="space-y-2">
+    <div className="mt-8 space-y-2 px-4">
       <Heading>Articles</Heading>
       <p>List of articles will be displayed here.</p>
       <Suspense fallback={<RefreshSpinner />}>

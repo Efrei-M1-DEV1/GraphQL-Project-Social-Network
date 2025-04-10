@@ -52,7 +52,7 @@ export default function ArticleCreationPage() {
   };
 
   return (
-    <div className="mx-auto max-w-screen-md">
+    <div className="mx-auto mt-8 max-w-screen-md px-4">
       <Card>
         <CardHeader>
           <CardTitle>Créer un nouvel article</CardTitle>
