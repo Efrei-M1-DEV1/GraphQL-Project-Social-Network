@@ -1,30 +1,32 @@
 import { graphql } from "@/gql";
-import type { GetCommentQuery } from "@/gql/graphql";
+import type { CommentsByArticleQuery } from "@/gql/graphql";
 import { useSuspenseQuery } from "@apollo/client";
 
 const GET_COMMENT = graphql(`
-  query GetComment($id: Int!) {
-    article(id: $id) {
-      comments {
+  query CommentsByArticle($articleId: Int!) {
+  commentsByArticle(articleId: $articleId) {
+    edges {
+      node {
         id
         content
-        updatedAt
         author {
           id
           name
         }
+        createdAt
       }
     }
   }
+}
 `);
 
 export default function CommentDetails({ id }: { id: number }) {
-  const { data } = useSuspenseQuery<GetCommentQuery>(GET_COMMENT, {
+  const { data } = useSuspenseQuery<CommentsByArticleQuery>(GET_COMMENT, {
     variables: {
       id,
     },
   });
-  const comments = data?.article?.comments ?? [];
+  const comments = data.commentsByArticle.edges.map((edge) => edge.node);
   if (comments.length > 0) {
     return (
       <div className="flex flex-col gap-4">
@@ -33,7 +35,7 @@ export default function CommentDetails({ id }: { id: number }) {
             <div className="font-semibold text-sm">{comment.author.name}</div>
             <div className="text-gray-700 text-sm">{comment.content}</div>
             <div className="text-gray-500 text-xs">
-              {new Date(comment.updatedAt).toLocaleDateString("fr-FR", {
+              {new Date(comment.createdAt).toLocaleDateString("fr-FR", {
                 year: "numeric",
                 month: "long",
                 day: "numeric",
