@@ -17,7 +17,7 @@ type Documents = {
   "\n  query Hello {\n    hello\n  }\n": typeof types.HelloDocument;
   "\n  query GetArticle($id: Int!) {\n    article(id: $id) {\n      id\n      title\n      content\n      createdAt\n      author {\n        id\n        name\n      }\n    }\n  }\n": typeof types.GetArticleDocument;
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n": typeof types.CreateArticleDocument;
-  "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n": typeof types.ArticlesDocument;
+  "\n  query Articles($first: Int, $after: String) {\n    articles(first: $first, after: $after) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          content\n          author {\n            id\n            email\n            name\n            createdAt\n            updatedAt\n          }\n          commentCount\n          createdAt\n          updatedAt\n        }\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n  }\n": typeof types.ArticlesDocument;
   "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": typeof types.QueryDocument;
   "\n  mutation UpdateArticle($id: Int!, $title: String!, $content: String!) {\n    updateArticle(id: $id, title: $title, content: $content) {\n      id\n      title\n      content\n    }\n  }\n": typeof types.UpdateArticleDocument;
   "\n  mutation Login($email: String!, $password: String!) {\n    login(email: $email, password: $password) {\n      token\n      user {\n        id\n        name\n      }\n    }\n  }\n": typeof types.LoginDocument;
@@ -29,7 +29,7 @@ const documents: Documents = {
     types.GetArticleDocument,
   "\n  mutation CreateArticle($title: String!, $content: String!) {\n  createArticle(title: $title, content: $content) {\n    id\n    author {\n      name\n    }\n  }\n}\n":
     types.CreateArticleDocument,
-  "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n":
+  "\n  query Articles($first: Int, $after: String) {\n    articles(first: $first, after: $after) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          content\n          author {\n            id\n            email\n            name\n            createdAt\n            updatedAt\n          }\n          commentCount\n          createdAt\n          updatedAt\n        }\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n  }\n":
     types.ArticlesDocument,
   "\nquery Query($id: Int!) {\n  article(id: $id) {\n    id\n    title\n    content\n  }\n}\n": types.QueryDocument,
   "\n  mutation UpdateArticle($id: Int!, $title: String!, $content: String!) {\n    updateArticle(id: $id, title: $title, content: $content) {\n      id\n      title\n      content\n    }\n  }\n":
@@ -74,8 +74,8 @@ export function graphql(
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
 export function graphql(
-  source: "\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n",
-): (typeof documents)["\n  query Articles($first: Int, $after: Int) {\n    articles(first: $first, after: $after) {\n      id,\n      title\n      content\n    }\n  }\n"];
+  source: "\n  query Articles($first: Int, $after: String) {\n    articles(first: $first, after: $after) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          content\n          author {\n            id\n            email\n            name\n            createdAt\n            updatedAt\n          }\n          commentCount\n          createdAt\n          updatedAt\n        }\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n  }\n",
+): (typeof documents)["\n  query Articles($first: Int, $after: String) {\n    articles(first: $first, after: $after) {\n      edges {\n        cursor\n        node {\n          id\n          title\n          content\n          author {\n            id\n            email\n            name\n            createdAt\n            updatedAt\n          }\n          commentCount\n          createdAt\n          updatedAt\n        }\n      }\n      pageInfo {\n        endCursor\n        hasNextPage\n      }\n    }\n  }\n"];
 /**
  * The graphql function is used to parse GraphQL queries into a document that can be used by GraphQL clients.
  */
