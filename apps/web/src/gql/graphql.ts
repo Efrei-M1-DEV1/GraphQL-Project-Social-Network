@@ -14,38 +14,66 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean };
   Int: { input: number; output: number };
   Float: { input: number; output: number };
+  /** A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar. */
+  DateTime: { input: any; output: any };
 };
 
 export type Article = {
   __typename?: "Article";
   author: User;
-  comments: Array<Comment>;
+  commentCount?: Maybe<Scalars["Int"]["output"]>;
   content: Scalars["String"]["output"];
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
   title: Scalars["String"]["output"];
-  updatedAt: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type ArticleConnection = {
+  __typename?: "ArticleConnection";
+  edges: Array<ArticleEdge>;
+  pageInfo: PageInfo;
+};
+
+export type ArticleEdge = {
+  __typename?: "ArticleEdge";
+  cursor: Scalars["String"]["output"];
+  node: Article;
 };
 
 export type AuthPayload = {
   __typename?: "AuthPayload";
+  refreshToken: Scalars["String"]["output"];
   token: Scalars["String"]["output"];
   user: User;
 };
 
 export type Comment = {
   __typename?: "Comment";
+  article: Article;
   author: User;
   content: Scalars["String"]["output"];
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
-  updatedAt: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
+};
+
+export type CommentConnection = {
+  __typename?: "CommentConnection";
+  edges: Array<CommentEdge>;
+  pageInfo: PageInfo;
+};
+
+export type CommentEdge = {
+  __typename?: "CommentEdge";
+  cursor: Scalars["String"]["output"];
+  node: Comment;
 };
 
 export type Like = {
   __typename?: "Like";
   article: Article;
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
   user: User;
 };
@@ -58,6 +86,7 @@ export type Mutation = {
   deleteComment: Scalars["Boolean"]["output"];
   likeArticle: Like;
   login: AuthPayload;
+  logout: Scalars["Boolean"]["output"];
   register: AuthPayload;
   unlikeArticle: Scalars["Boolean"]["output"];
   updateArticle: Article;
@@ -91,6 +120,10 @@ export type MutationLoginArgs = {
   password: Scalars["String"]["input"];
 };
 
+export type MutationLogoutArgs = {
+  refreshToken: Scalars["String"]["input"];
+};
+
 export type MutationRegisterArgs = {
   email: Scalars["String"]["input"];
   name: Scalars["String"]["input"];
@@ -112,11 +145,18 @@ export type MutationUpdateCommentArgs = {
   id: Scalars["Int"]["input"];
 };
 
+export type PageInfo = {
+  __typename?: "PageInfo";
+  endCursor?: Maybe<Scalars["String"]["output"]>;
+  hasNextPage: Scalars["Boolean"]["output"];
+};
+
 export type Query = {
   __typename?: "Query";
   article?: Maybe<Article>;
-  articles: Array<Article>;
-  articlesByAuthor: Array<Article>;
+  articles: ArticleConnection;
+  articlesByAuthor: ArticleConnection;
+  commentsByArticle: CommentConnection;
   hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
@@ -126,23 +166,35 @@ export type QueryArticleArgs = {
 };
 
 export type QueryArticlesArgs = {
-  after?: InputMaybe<Scalars["Int"]["input"]>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
   first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
 export type QueryArticlesByAuthorArgs = {
-  after?: InputMaybe<Scalars["Int"]["input"]>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
   authorId: Scalars["Int"]["input"];
   first?: InputMaybe<Scalars["Int"]["input"]>;
 };
 
+export type QueryCommentsByArticleArgs = {
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  articleId: Scalars["Int"]["input"];
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  sort?: InputMaybe<SortOrder>;
+};
+
+export enum SortOrder {
+  Asc = "ASC",
+  Desc = "DESC",
+}
+
 export type User = {
   __typename?: "User";
-  createdAt: Scalars["String"]["output"];
+  createdAt: Scalars["DateTime"]["output"];
   email: Scalars["String"]["output"];
   id: Scalars["Int"]["output"];
   name?: Maybe<Scalars["String"]["output"]>;
-  updatedAt: Scalars["String"]["output"];
+  updatedAt: Scalars["DateTime"]["output"];
 };
 
 export type HelloQueryVariables = Exact<{ [key: string]: never }>;
@@ -160,7 +212,7 @@ export type GetArticleQuery = {
     id: number;
     title: string;
     content: string;
-    createdAt: string;
+    createdAt: any;
     author: { __typename?: "User"; id: number; name?: string | null };
   } | null;
 };
@@ -177,12 +229,29 @@ export type CreateArticleMutation = {
 
 export type ArticlesQueryVariables = Exact<{
   first?: InputMaybe<Scalars["Int"]["input"]>;
-  after?: InputMaybe<Scalars["Int"]["input"]>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
 }>;
 
 export type ArticlesQuery = {
   __typename?: "Query";
-  articles: Array<{ __typename?: "Article"; id: number; title: string; content: string }>;
+  articles: {
+    __typename?: "ArticleConnection";
+    edges: Array<{
+      __typename?: "ArticleEdge";
+      cursor: string;
+      node: {
+        __typename?: "Article";
+        id: number;
+        title: string;
+        content: string;
+        commentCount?: number | null;
+        createdAt: any;
+        updatedAt: any;
+        author: { __typename?: "User"; id: number; email: string; name?: string | null; createdAt: any; updatedAt: any };
+      };
+    }>;
+    pageInfo: { __typename?: "PageInfo"; endCursor?: string | null; hasNextPage: boolean };
+  };
 };
 
 export type DeleteArticleMutationVariables = Exact<{
@@ -366,7 +435,7 @@ export const ArticlesDocument = {
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
-          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
         },
       ],
       selectionSet: {
@@ -390,9 +459,56 @@ export const ArticlesDocument = {
             selectionSet: {
               kind: "SelectionSet",
               selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                { kind: "Field", name: { kind: "Name", value: "title" } },
-                { kind: "Field", name: { kind: "Name", value: "content" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "edges" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "cursor" } },
+                      {
+                        kind: "Field",
+                        name: { kind: "Name", value: "node" },
+                        selectionSet: {
+                          kind: "SelectionSet",
+                          selections: [
+                            { kind: "Field", name: { kind: "Name", value: "id" } },
+                            { kind: "Field", name: { kind: "Name", value: "title" } },
+                            { kind: "Field", name: { kind: "Name", value: "content" } },
+                            {
+                              kind: "Field",
+                              name: { kind: "Name", value: "author" },
+                              selectionSet: {
+                                kind: "SelectionSet",
+                                selections: [
+                                  { kind: "Field", name: { kind: "Name", value: "id" } },
+                                  { kind: "Field", name: { kind: "Name", value: "email" } },
+                                  { kind: "Field", name: { kind: "Name", value: "name" } },
+                                  { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                                  { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+                                ],
+                              },
+                            },
+                            { kind: "Field", name: { kind: "Name", value: "commentCount" } },
+                            { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                            { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+                          ],
+                        },
+                      },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "pageInfo" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "endCursor" } },
+                      { kind: "Field", name: { kind: "Name", value: "hasNextPage" } },
+                    ],
+                  },
+                },
               ],
             },
           },

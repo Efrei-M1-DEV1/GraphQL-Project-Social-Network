@@ -1,3 +1,4 @@
+import CommentDetails from "@/components/comment";
 import { Skeleton } from "@/components/skeleton";
 import { graphql } from "@/gql";
 import type { GetArticleQuery } from "@/gql/graphql";
@@ -39,6 +40,13 @@ export default function ArticleDetailsPage(props: { params?: { id: string } }) {
         <Suspense fallback={<ArticleDetailsFallback />}>
           <ArticleDetails id={+id} navigate={navigate} />
         </Suspense>
+        <CardBody>
+          <p className="font-semibold">Commentaires</p>
+
+          <Suspense fallback={<Skeleton className="h-6 w-full" />}>
+            <CommentDetails articleId={+id} />
+          </Suspense>
+        </CardBody>
       </Card>
     </div>
   );
