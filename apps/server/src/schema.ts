@@ -20,6 +20,7 @@ export const typeDefs = `#graphql
     content: String!
     author: User!
     commentCount: Int
+    likeCount: Int
     createdAt: DateTime!
     updatedAt: DateTime!
   }
@@ -78,6 +79,7 @@ export const typeDefs = `#graphql
     article(id: Int!): Article
     articlesByAuthor(authorId: Int!, first: Int, after: String): ArticleConnection!
     commentsByArticle(articleId: Int!, first: Int, after: String, sort: SortOrder): CommentConnection!
+    hasLikedArticle(articleId: Int!): Boolean!
   }
 
   type Mutation {
@@ -92,5 +94,6 @@ export const typeDefs = `#graphql
     updateComment(id: Int!, content: String!): Comment!
     deleteComment(id: Int!): Boolean!
     logout(refreshToken: String!): Boolean!
+    refreshToken(token: String!): AuthPayload!
   }
 `;

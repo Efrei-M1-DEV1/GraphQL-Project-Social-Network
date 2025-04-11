@@ -1,6 +1,6 @@
 import { Link } from "@/components/link";
 import { RefreshSpinner } from "@/components/refresh-spinner";
-import { type UserState, signInUser } from "@/data-access/user";
+import { type State, signInUser } from "@/data-access/user";
 import { graphql } from "@/gql";
 import type { LoginMutation } from "@/gql/graphql";
 import { useMutation } from "@apollo/client";
@@ -17,10 +17,7 @@ const SIGN_IN = graphql(`
   mutation Login($email: String!, $password: String!) {
     login(email: $email, password: $password) {
       token
-      user {
-        id
-        name
-      }
+      refreshToken
     }
   }
 `);
@@ -29,7 +26,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [signInMutation, { data }] = useMutation<LoginMutation>(SIGN_IN);
 
-  const [state, submitAction, loading] = useActionState<UserState, FormData>(
+  const [state, submitAction, loading] = useActionState<State, FormData>(
     async (prevState, payload) => {
       const state = await signInUser(prevState, payload, signInMutation);
       return state;
@@ -43,10 +40,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     const handleLoginSuccess = async () => {
-      if (data?.login?.token) {
+      if (data?.login) {
         await new Promise((resolve) => setTimeout(resolve, 3000)); // Simulate a delay
-        const token = data?.login?.token;
+
+        // Store both token and refreshToken
+        const { token, refreshToken } = data.login;
         localStorage.setItem("token", token || "");
+        localStorage.setItem("refreshToken", refreshToken || "");
 
         navigate("/");
       }

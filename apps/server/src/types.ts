@@ -25,6 +25,7 @@ export type Article = {
   content: Scalars["String"]["output"];
   createdAt: Scalars["DateTime"]["output"];
   id: Scalars["Int"]["output"];
+  likeCount?: Maybe<Scalars["Int"]["output"]>;
   title: Scalars["String"]["output"];
   updatedAt: Scalars["DateTime"]["output"];
 };
@@ -87,6 +88,7 @@ export type Mutation = {
   likeArticle: Like;
   login: AuthPayload;
   logout: Scalars["Boolean"]["output"];
+  refreshToken: AuthPayload;
   register: AuthPayload;
   unlikeArticle: Scalars["Boolean"]["output"];
   updateArticle: Article;
@@ -124,6 +126,10 @@ export type MutationLogoutArgs = {
   refreshToken: Scalars["String"]["input"];
 };
 
+export type MutationRefreshTokenArgs = {
+  token: Scalars["String"]["input"];
+};
+
 export type MutationRegisterArgs = {
   email: Scalars["String"]["input"];
   name: Scalars["String"]["input"];
@@ -157,6 +163,7 @@ export type Query = {
   articles: ArticleConnection;
   articlesByAuthor: ArticleConnection;
   commentsByArticle: CommentConnection;
+  hasLikedArticle: Scalars["Boolean"]["output"];
   hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
@@ -181,6 +188,10 @@ export type QueryCommentsByArticleArgs = {
   articleId: Scalars["Int"]["input"];
   first?: InputMaybe<Scalars["Int"]["input"]>;
   sort?: InputMaybe<SortOrder>;
+};
+
+export type QueryHasLikedArticleArgs = {
+  articleId: Scalars["Int"]["input"];
 };
 
 export enum SortOrder {
@@ -317,6 +328,7 @@ export type ArticleResolvers<
   content?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   id?: Resolver<ResolversTypes["Int"], ParentType, ContextType>;
+  likeCount?: Resolver<Maybe<ResolversTypes["Int"]>, ParentType, ContextType>;
   title?: Resolver<ResolversTypes["String"], ParentType, ContextType>;
   updatedAt?: Resolver<ResolversTypes["DateTime"], ParentType, ContextType>;
   __isTypeOf?: IsTypeOfResolverFn<ParentType, ContextType>;
@@ -422,6 +434,12 @@ export type MutationResolvers<
     RequireFields<MutationLoginArgs, "email" | "password">
   >;
   logout?: Resolver<ResolversTypes["Boolean"], ParentType, ContextType, RequireFields<MutationLogoutArgs, "refreshToken">>;
+  refreshToken?: Resolver<
+    ResolversTypes["AuthPayload"],
+    ParentType,
+    ContextType,
+    RequireFields<MutationRefreshTokenArgs, "token">
+  >;
   register?: Resolver<
     ResolversTypes["AuthPayload"],
     ParentType,
@@ -469,6 +487,12 @@ export type QueryResolvers<
     ParentType,
     ContextType,
     RequireFields<QueryCommentsByArticleArgs, "articleId">
+  >;
+  hasLikedArticle?: Resolver<
+    ResolversTypes["Boolean"],
+    ParentType,
+    ContextType,
+    RequireFields<QueryHasLikedArticleArgs, "articleId">
   >;
   hello?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   users?: Resolver<Array<ResolversTypes["User"]>, ParentType, ContextType>;
