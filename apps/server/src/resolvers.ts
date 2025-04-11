@@ -4,10 +4,32 @@ import { loginSchema, registerSchema } from "@repo/utils/schemas/auth";
 import { createCommentSchema, updateCommentSchema } from "@repo/utils/schemas/comment";
 import { cursorSchema } from "@repo/utils/schemas/cursor";
 import bcrypt from "bcrypt";
+import { GraphQLError } from "graphql";
 import { DateTimeResolver } from "graphql-scalars";
 import type { DataSourceContext } from "./context";
 import type { Resolvers } from "./types";
 import { generateRefreshToken, generateToken, verifyRefreshToken } from "./utils/jwt.js";
+
+// Error utility functions
+const throwUnauthenticatedError: () => never = () => {
+  throw new GraphQLError("Unauthorized: Authentication required", {
+    extensions: {
+      code: "UNAUTHENTICATED",
+      http: { status: 401 },
+    },
+  });
+};
+
+const throwForbiddenError: (message?: string) => never = (message = "Permission denied") => {
+  throw new GraphQLError(message, {
+    extensions: {
+      code: "FORBIDDEN",
+      http: { status: 403 },
+    },
+  });
+};
+
+// ... rest of code stays the same
 
 type ArticleCursor = {
   createdAt: string;
@@ -246,18 +268,33 @@ export const resolvers: Resolvers = {
         },
       };
     },
+    hasLikedArticle: async (_parent, { articleId }, context: DataSourceContext) => {
+      await simulateDelay();
+      if (!context.user) {
+        throwUnauthenticatedError();
+      }
+      const like = await context.dataSources.db.like.findFirst({
+        where: { userId: context.user.id, articleId },
+      });
+      return !!like;
+    },
   },
   Mutation: {
     createArticle: async (_parent, { title, content }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to create an article");
+        throwUnauthenticatedError();
       }
 
       const parsed = createArticleSchema.safeParse({ title, content });
 
       if (!parsed.success) {
-        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+        throw new GraphQLError(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
 
       const article = await context.dataSources.db.article.create({
@@ -269,14 +306,19 @@ export const resolvers: Resolvers = {
     updateArticle: async (_parent, { id, title, content }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to update an article");
+        throwUnauthenticatedError();
       }
       const article = await context.dataSources.db.article.findUnique({ where: { id } });
       if (!article) {
-        throw new Error(`Article not found: Article with ID ${id} does not exist`);
+        throw new GraphQLError(`Article not found: Article with ID ${id} does not exist`, {
+          extensions: {
+            code: "NOT_FOUND",
+            http: { status: 404 },
+          },
+        });
       }
       if (article.authorId !== context.user.id) {
-        throw new Error("Forbidden: You can only update articles that you created");
+        throwForbiddenError("You can only update articles that you created");
       }
       return context.dataSources.db.article.update({
         where: { id },
@@ -287,36 +329,50 @@ export const resolvers: Resolvers = {
     deleteArticle: async (_parent, { id }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to delete an article");
+        throwUnauthenticatedError();
       }
       const article = await context.dataSources.db.article.findUnique({ where: { id } });
       if (!article) {
-        throw new Error(`Article not found: Article with ID ${id} does not exist`);
+        throw new GraphQLError(`Article not found: Article with ID ${id} does not exist`, {
+          extensions: {
+            code: "NOT_FOUND",
+            http: { status: 404 },
+          },
+        });
       }
       if (article.authorId !== context.user.id) {
-        throw new Error("Forbidden: You can only delete articles that you created");
+        throwForbiddenError("You can only delete articles that you created");
       }
 
-      const commentCount = await context.dataSources.db.comment.count({ where: { articleId: id } });
       await context.dataSources.db.article.delete({ where: { id } });
       return true;
     },
     createComment: async (_parent, args, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to create a comment");
+        throwUnauthenticatedError();
       }
 
       // Validate input
       const parsed = createCommentSchema.safeParse(args);
       if (!parsed.success) {
-        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+        throw new GraphQLError(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
       const { content, articleId } = parsed.data;
 
       const article = await context.dataSources.db.article.findUnique({ where: { id: articleId } });
       if (!article) {
-        throw new Error("Article not found: The specified article does not exist");
+        throw new GraphQLError(`Article not found: Article with ID ${articleId} does not exist`, {
+          extensions: {
+            code: "NOT_FOUND",
+            http: { status: 404 },
+          },
+        });
       }
 
       return context.dataSources.db.comment.create({
@@ -327,13 +383,18 @@ export const resolvers: Resolvers = {
     updateComment: async (_parent, args, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to update a comment");
+        throwUnauthenticatedError();
       }
 
       // Validate input
       const parsed = updateCommentSchema.safeParse(args);
       if (!parsed.success) {
-        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+        throw new GraphQLError(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
       const { id, content } = parsed.data;
 
@@ -342,10 +403,15 @@ export const resolvers: Resolvers = {
         include: { author: true },
       });
       if (!comment) {
-        throw new Error("Comment not found: The specified comment does not exist");
+        throw new GraphQLError(`Comment not found: Comment with ID ${id} does not exist`, {
+          extensions: {
+            code: "NOT_FOUND",
+            http: { status: 404 },
+          },
+        });
       }
       if (comment.authorId !== context.user.id) {
-        throw new Error("Forbidden: You can only update your own comments");
+        throwForbiddenError("You can only update comments that you created");
       }
       return context.dataSources.db.comment.update({
         where: { id },
@@ -356,17 +422,22 @@ export const resolvers: Resolvers = {
     deleteComment: async (_parent, { id }: { id: number }, context: DataSourceContext) => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to delete a comment");
+        throwUnauthenticatedError();
       }
       const comment = await context.dataSources.db.comment.findUnique({
         where: { id },
         include: { author: true },
       });
       if (!comment) {
-        throw new Error("Comment not found: The specified comment does not exist");
+        throw new GraphQLError(`Comment not found: Comment with ID ${id} does not exist`, {
+          extensions: {
+            code: "NOT_FOUND",
+            http: { status: 404 },
+          },
+        });
       }
       if (comment.authorId !== context.user.id) {
-        throw new Error("Forbidden: You can only delete your own comments");
+        throwForbiddenError("You can only delete comments that you created");
       }
       await context.dataSources.db.comment.delete({ where: { id } });
       return true;
@@ -375,12 +446,22 @@ export const resolvers: Resolvers = {
       await simulateDelay();
       const parsed = registerSchema.safeParse(args);
       if (!parsed.success) {
-        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+        throw new GraphQLError(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
       const { email, password, name } = parsed.data;
       const existingUser = await context.dataSources.db.user.findUnique({ where: { email } });
       if (existingUser) {
-        throw new Error("User with this email already exists");
+        throw new GraphQLError(`User already exists: User with email ${email} already exists`, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = await context.dataSources.db.user.create({
@@ -398,12 +479,22 @@ export const resolvers: Resolvers = {
       await simulateDelay();
       const parsed = loginSchema.safeParse(args);
       if (!parsed.success) {
-        throw new Error(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`);
+        throw new GraphQLError(`Validation failed: ${parsed.error.issues.map((i) => i.message).join(", ")}`, {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
       const { email, password } = parsed.data;
       const user = await context.dataSources.db.user.findUnique({ where: { email } });
       if (!user || !(await bcrypt.compare(password, user.password))) {
-        throw new Error("Invalid email or password");
+        throw new GraphQLError("Invalid credentials: Invalid email or password", {
+          extensions: {
+            code: "UNAUTHENTICATED",
+            http: { status: 401 },
+          },
+        });
       }
       const token = generateToken(user.id);
       const refreshToken = generateRefreshToken(user.id);
@@ -416,10 +507,15 @@ export const resolvers: Resolvers = {
     logout: async (_parent, { refreshToken }, context: DataSourceContext): Promise<boolean> => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to log out");
+        throwUnauthenticatedError();
       }
       if (!refreshToken) {
-        throw new Error("Refresh token required");
+        throw new GraphQLError("Refresh token required: You must provide a refresh token to log out", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
 
       try {
@@ -439,7 +535,12 @@ export const resolvers: Resolvers = {
         }
 
         if (!matchedToken) {
-          throw new Error("Invalid refresh token");
+          throw new GraphQLError("Invalid refresh token: The provided refresh token does not match any stored tokens", {
+            extensions: {
+              code: "UNAUTHENTICATED",
+              http: { status: 401 },
+            },
+          });
         }
 
         await context.dataSources.db.refreshToken.delete({
@@ -453,16 +554,31 @@ export const resolvers: Resolvers = {
     },
     refreshToken: async (_parent, { token }, context: DataSourceContext) => {
       await simulateDelay();
-      if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to refresh the token");
-      }
+
       if (!token) {
-        throw new Error("Refresh token required");
+        throw new GraphQLError("Refresh token required", {
+          extensions: {
+            code: "BAD_USER_INPUT",
+            http: { status: 400 },
+          },
+        });
       }
 
       try {
+        // Verify the refresh token and extract userId directly
+        const { userId } = verifyRefreshToken(token);
+        if (!userId) {
+          throw new GraphQLError("Invalid refresh token", {
+            extensions: {
+              code: "UNAUTHENTICATED",
+              http: { status: 401 },
+            },
+          });
+        }
+
+        // Find matching stored token
         const userRefreshTokens = await context.dataSources.db.refreshToken.findMany({
-          where: { userId: context.user.id },
+          where: { userId },
         });
 
         let matchedToken: RefreshToken | null = null;
@@ -475,19 +591,30 @@ export const resolvers: Resolvers = {
         }
 
         if (!matchedToken) {
-          throw new Error("Invalid refresh token");
+          throw new GraphQLError("Invalid refresh token", {
+            extensions: {
+              code: "UNAUTHENTICATED",
+              http: { status: 401 },
+            },
+          });
         }
 
         const user = await context.dataSources.db.user.findUnique({
-          where: { id: context.user.id },
+          where: { id: userId },
         });
 
         if (!user) {
-          throw new Error("User not found");
+          throw new GraphQLError("User not found", {
+            extensions: {
+              code: "NOT_FOUND",
+              http: { status: 404 },
+            },
+          });
         }
 
-        const newToken = generateToken(context.user.id);
-        const newRefreshToken = generateRefreshToken(context.user.id);
+        // Generate new tokens
+        const newToken = generateToken(userId);
+        const newRefreshToken = generateRefreshToken(userId);
         const hashedNewRefreshToken = await bcrypt.hash(newRefreshToken, 10);
 
         await context.dataSources.db.refreshToken.update({
@@ -497,24 +624,34 @@ export const resolvers: Resolvers = {
 
         return { token: newToken, refreshToken: newRefreshToken, user };
       } catch (error) {
-        throw new Error(`Failed to refresh token: ${error instanceof Error ? error.message : "Unknown error"}`);
+        throw new GraphQLError(`Failed to refresh token: ${error instanceof Error ? error.message : "Unknown error"}`, {
+          extensions: {
+            code: "UNAUTHENTICATED",
+            http: { status: 401 },
+          },
+        });
       }
     },
     likeArticle: async (_parent, { articleId }, context: DataSourceContext) => {
       await simulateDelay();
       const userId = context.user?.id;
       if (!userId) {
-        throw new Error("Unauthorized: You must be logged in to like an article");
+        throwUnauthenticatedError();
       }
       const existingLike = await context.dataSources.db.like.findFirst({
         where: { userId, articleId },
       });
       if (existingLike) {
-        throw new Error("You have already liked this article");
+        throwForbiddenError("You have already liked this article");
       }
       const articleExists = await context.dataSources.db.article.count({ where: { id: articleId } });
       if (articleExists === 0) {
-        throw new Error("Article not found");
+        throw new GraphQLError(`Article not found: Article with ID ${articleId} does not exist`, {
+          extensions: {
+            code: "NOT_FOUND",
+            http: { status: 404 },
+          },
+        });
       }
       const like = await context.dataSources.db.like.create({
         data: { articleId, userId },
@@ -528,13 +665,18 @@ export const resolvers: Resolvers = {
     unlikeArticle: async (_parent, { articleId }, context: DataSourceContext): Promise<boolean> => {
       await simulateDelay();
       if (!context.user) {
-        throw new Error("Unauthorized: You must be logged in to unlike an article");
+        throwUnauthenticatedError();
       }
       const existingLike = await context.dataSources.db.like.findFirst({
         where: { userId: context.user.id, articleId },
       });
       if (!existingLike) {
-        throw new Error("Like not found");
+        throw new GraphQLError("Like not found: You have not liked this article", {
+          extensions: {
+            code: "NOT_FOUND",
+            http: { status: 404 },
+          },
+        });
       }
       await context.dataSources.db.like.delete({ where: { id: existingLike.id } });
       return true;

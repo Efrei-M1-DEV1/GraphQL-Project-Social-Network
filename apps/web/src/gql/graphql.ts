@@ -163,6 +163,7 @@ export type Query = {
   articles: ArticleConnection;
   articlesByAuthor: ArticleConnection;
   commentsByArticle: CommentConnection;
+  hasLikedArticle: Scalars["Boolean"]["output"];
   hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
@@ -189,6 +190,10 @@ export type QueryCommentsByArticleArgs = {
   sort?: InputMaybe<SortOrder>;
 };
 
+export type QueryHasLikedArticleArgs = {
+  articleId: Scalars["Int"]["input"];
+};
+
 export enum SortOrder {
   Asc = "ASC",
   Desc = "DESC",
@@ -203,16 +208,64 @@ export type User = {
   updatedAt: Scalars["DateTime"]["output"];
 };
 
-export type CommentsByArticleQueryVariables = Exact<{
+export type ArticleDetailsQueryVariables = Exact<{
   articleId: Scalars["Int"]["input"];
 }>;
 
-export type CommentsByArticleQuery = {
+export type ArticleDetailsQuery = {
+  __typename?: "Query";
+  article?: {
+    __typename?: "Article";
+    id: number;
+    title: string;
+    content: string;
+    createdAt: any;
+    commentCount?: number | null;
+    likeCount?: number | null;
+    author: { __typename?: "User"; id: number; name?: string | null };
+  } | null;
+};
+
+export type LikeArticleMutationVariables = Exact<{
+  articleId: Scalars["Int"]["input"];
+}>;
+
+export type LikeArticleMutation = {
+  __typename?: "Mutation";
+  likeArticle: { __typename?: "Like"; id: number; article: { __typename?: "Article"; id: number; likeCount?: number | null } };
+};
+
+export type UnlikeArticleMutationVariables = Exact<{
+  articleId: Scalars["Int"]["input"];
+}>;
+
+export type UnlikeArticleMutation = { __typename?: "Mutation"; unlikeArticle: boolean };
+
+export type UpdateArticleQ1MutationVariables = Exact<{
+  updateArticleId: Scalars["Int"]["input"];
+  title?: InputMaybe<Scalars["String"]["input"]>;
+  content?: InputMaybe<Scalars["String"]["input"]>;
+}>;
+
+export type UpdateArticleQ1Mutation = {
+  __typename?: "Mutation";
+  updateArticle: { __typename?: "Article"; id: number; title: string; content: string; updatedAt: any };
+};
+
+export type PaginatedArticleCommentsQueryVariables = Exact<{
+  articleId: Scalars["Int"]["input"];
+  first?: InputMaybe<Scalars["Int"]["input"]>;
+  after?: InputMaybe<Scalars["String"]["input"]>;
+  sort?: InputMaybe<SortOrder>;
+}>;
+
+export type PaginatedArticleCommentsQuery = {
   __typename?: "Query";
   commentsByArticle: {
     __typename?: "CommentConnection";
     edges: Array<{
       __typename?: "CommentEdge";
+      cursor: string;
       node: {
         __typename?: "Comment";
         id: number;
@@ -221,8 +274,31 @@ export type CommentsByArticleQuery = {
         author: { __typename?: "User"; id: number; name?: string | null };
       };
     }>;
+    pageInfo: { __typename?: "PageInfo"; hasNextPage: boolean; endCursor?: string | null };
   };
 };
+
+export type CreateArticleCommentMutationVariables = Exact<{
+  content: Scalars["String"]["input"];
+  articleId: Scalars["Int"]["input"];
+}>;
+
+export type CreateArticleCommentMutation = {
+  __typename?: "Mutation";
+  createComment: {
+    __typename?: "Comment";
+    id: number;
+    content: string;
+    createdAt: any;
+    author: { __typename?: "User"; id: number; name?: string | null };
+  };
+};
+
+export type DeleteArticleCommentMutationVariables = Exact<{
+  deleteCommentId: Scalars["Int"]["input"];
+}>;
+
+export type DeleteArticleCommentMutation = { __typename?: "Mutation"; deleteComment: boolean };
 
 export type HelloQueryVariables = Exact<{ [key: string]: never }>;
 
@@ -237,21 +313,11 @@ export type RefreshTokenMutation = {
   refreshToken: { __typename?: "AuthPayload"; token: string; refreshToken: string };
 };
 
-export type ArticleQueryVariables = Exact<{
+export type HasLikedArticleQueryVariables = Exact<{
   articleId: Scalars["Int"]["input"];
 }>;
 
-export type ArticleQuery = {
-  __typename?: "Query";
-  article?: {
-    __typename?: "Article";
-    id: number;
-    title: string;
-    content: string;
-    createdAt: any;
-    author: { __typename?: "User"; id: number; name?: string | null };
-  } | null;
-};
+export type HasLikedArticleQuery = { __typename?: "Query"; hasLikedArticle: boolean };
 
 export type CreateArticleMutationVariables = Exact<{
   title: Scalars["String"]["input"];
@@ -329,18 +395,233 @@ export type RegisterMutation = {
   register: { __typename?: "AuthPayload"; token: string; refreshToken: string };
 };
 
-export const CommentsByArticleDocument = {
+export const ArticleDetailsDocument = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "CommentsByArticle" },
+      name: { kind: "Name", value: "ArticleDetails" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
           variable: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
           type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "article" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "title" } },
+                { kind: "Field", name: { kind: "Name", value: "content" } },
+                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                { kind: "Field", name: { kind: "Name", value: "commentCount" } },
+                { kind: "Field", name: { kind: "Name", value: "likeCount" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "author" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<ArticleDetailsQuery, ArticleDetailsQueryVariables>;
+export const LikeArticleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "LikeArticle" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "likeArticle" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "articleId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "article" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "likeCount" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<LikeArticleMutation, LikeArticleMutationVariables>;
+export const UnlikeArticleDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "UnlikeArticle" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "unlikeArticle" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "articleId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UnlikeArticleMutation, UnlikeArticleMutationVariables>;
+export const UpdateArticleQ1Document = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "UpdateArticleQ1" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "updateArticleId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "title" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "content" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "updateArticle" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "updateArticleId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "title" },
+                value: { kind: "Variable", name: { kind: "Name", value: "title" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "content" },
+                value: { kind: "Variable", name: { kind: "Name", value: "content" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "title" } },
+                { kind: "Field", name: { kind: "Name", value: "content" } },
+                { kind: "Field", name: { kind: "Name", value: "updatedAt" } },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<UpdateArticleQ1Mutation, UpdateArticleQ1MutationVariables>;
+export const PaginatedArticleCommentsDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "query",
+      name: { kind: "Name", value: "PaginatedArticleComments" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "first" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "Int" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "after" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "String" } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "sort" } },
+          type: { kind: "NamedType", name: { kind: "Name", value: "SortOrder" } },
         },
       ],
       selectionSet: {
@@ -354,6 +635,21 @@ export const CommentsByArticleDocument = {
                 kind: "Argument",
                 name: { kind: "Name", value: "articleId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "first" },
+                value: { kind: "Variable", name: { kind: "Name", value: "first" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "after" },
+                value: { kind: "Variable", name: { kind: "Name", value: "after" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "sort" },
+                value: { kind: "Variable", name: { kind: "Name", value: "sort" } },
               },
             ],
             selectionSet: {
@@ -373,6 +669,7 @@ export const CommentsByArticleDocument = {
                           selections: [
                             { kind: "Field", name: { kind: "Name", value: "id" } },
                             { kind: "Field", name: { kind: "Name", value: "content" } },
+                            { kind: "Field", name: { kind: "Name", value: "createdAt" } },
                             {
                               kind: "Field",
                               name: { kind: "Name", value: "author" },
@@ -384,10 +681,21 @@ export const CommentsByArticleDocument = {
                                 ],
                               },
                             },
-                            { kind: "Field", name: { kind: "Name", value: "createdAt" } },
                           ],
                         },
                       },
+                      { kind: "Field", name: { kind: "Name", value: "cursor" } },
+                    ],
+                  },
+                },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "pageInfo" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "hasNextPage" } },
+                      { kind: "Field", name: { kind: "Name", value: "endCursor" } },
                     ],
                   },
                 },
@@ -398,7 +706,102 @@ export const CommentsByArticleDocument = {
       },
     },
   ],
-} as unknown as DocumentNode<CommentsByArticleQuery, CommentsByArticleQueryVariables>;
+} as unknown as DocumentNode<PaginatedArticleCommentsQuery, PaginatedArticleCommentsQueryVariables>;
+export const CreateArticleCommentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "CreateArticleComment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "content" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "String" } } },
+        },
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "createComment" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "content" },
+                value: { kind: "Variable", name: { kind: "Name", value: "content" } },
+              },
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "articleId" },
+                value: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
+              },
+            ],
+            selectionSet: {
+              kind: "SelectionSet",
+              selections: [
+                { kind: "Field", name: { kind: "Name", value: "id" } },
+                { kind: "Field", name: { kind: "Name", value: "content" } },
+                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
+                {
+                  kind: "Field",
+                  name: { kind: "Name", value: "author" },
+                  selectionSet: {
+                    kind: "SelectionSet",
+                    selections: [
+                      { kind: "Field", name: { kind: "Name", value: "id" } },
+                      { kind: "Field", name: { kind: "Name", value: "name" } },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<CreateArticleCommentMutation, CreateArticleCommentMutationVariables>;
+export const DeleteArticleCommentDocument = {
+  kind: "Document",
+  definitions: [
+    {
+      kind: "OperationDefinition",
+      operation: "mutation",
+      name: { kind: "Name", value: "DeleteArticleComment" },
+      variableDefinitions: [
+        {
+          kind: "VariableDefinition",
+          variable: { kind: "Variable", name: { kind: "Name", value: "deleteCommentId" } },
+          type: { kind: "NonNullType", type: { kind: "NamedType", name: { kind: "Name", value: "Int" } } },
+        },
+      ],
+      selectionSet: {
+        kind: "SelectionSet",
+        selections: [
+          {
+            kind: "Field",
+            name: { kind: "Name", value: "deleteComment" },
+            arguments: [
+              {
+                kind: "Argument",
+                name: { kind: "Name", value: "id" },
+                value: { kind: "Variable", name: { kind: "Name", value: "deleteCommentId" } },
+              },
+            ],
+          },
+        ],
+      },
+    },
+  ],
+} as unknown as DocumentNode<DeleteArticleCommentMutation, DeleteArticleCommentMutationVariables>;
 export const HelloDocument = {
   kind: "Document",
   definitions: [
@@ -450,13 +853,13 @@ export const RefreshTokenDocument = {
     },
   ],
 } as unknown as DocumentNode<RefreshTokenMutation, RefreshTokenMutationVariables>;
-export const ArticleDocument = {
+export const HasLikedArticleDocument = {
   kind: "Document",
   definitions: [
     {
       kind: "OperationDefinition",
       operation: "query",
-      name: { kind: "Name", value: "Article" },
+      name: { kind: "Name", value: "HasLikedArticle" },
       variableDefinitions: [
         {
           kind: "VariableDefinition",
@@ -469,40 +872,20 @@ export const ArticleDocument = {
         selections: [
           {
             kind: "Field",
-            name: { kind: "Name", value: "article" },
+            name: { kind: "Name", value: "hasLikedArticle" },
             arguments: [
               {
                 kind: "Argument",
-                name: { kind: "Name", value: "id" },
+                name: { kind: "Name", value: "articleId" },
                 value: { kind: "Variable", name: { kind: "Name", value: "articleId" } },
               },
             ],
-            selectionSet: {
-              kind: "SelectionSet",
-              selections: [
-                { kind: "Field", name: { kind: "Name", value: "id" } },
-                { kind: "Field", name: { kind: "Name", value: "title" } },
-                { kind: "Field", name: { kind: "Name", value: "content" } },
-                { kind: "Field", name: { kind: "Name", value: "createdAt" } },
-                {
-                  kind: "Field",
-                  name: { kind: "Name", value: "author" },
-                  selectionSet: {
-                    kind: "SelectionSet",
-                    selections: [
-                      { kind: "Field", name: { kind: "Name", value: "id" } },
-                      { kind: "Field", name: { kind: "Name", value: "name" } },
-                    ],
-                  },
-                },
-              ],
-            },
           },
         ],
       },
     },
   ],
-} as unknown as DocumentNode<ArticleQuery, ArticleQueryVariables>;
+} as unknown as DocumentNode<HasLikedArticleQuery, HasLikedArticleQueryVariables>;
 export const CreateArticleDocument = {
   kind: "Document",
   definitions: [

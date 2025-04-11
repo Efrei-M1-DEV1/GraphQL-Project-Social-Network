@@ -1,6 +1,6 @@
 import { Link } from "@/components/link";
 import { RefreshSpinner } from "@/components/refresh-spinner";
-import { type UserState, signInUser } from "@/data-access/user";
+import { type State, signInUser } from "@/data-access/user";
 import { graphql } from "@/gql";
 import type { LoginMutation } from "@/gql/graphql";
 import { useMutation } from "@apollo/client";
@@ -26,7 +26,7 @@ export default function LoginPage() {
   const navigate = useNavigate();
   const [signInMutation, { data }] = useMutation<LoginMutation>(SIGN_IN);
 
-  const [state, submitAction, loading] = useActionState<UserState, FormData>(
+  const [state, submitAction, loading] = useActionState<State, FormData>(
     async (prevState, payload) => {
       const state = await signInUser(prevState, payload, signInMutation);
       return state;

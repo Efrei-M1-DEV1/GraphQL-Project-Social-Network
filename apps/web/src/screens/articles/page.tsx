@@ -1,5 +1,4 @@
 import { Link } from "@/components/link";
-import { RefreshSpinner } from "@/components/refresh-spinner";
 import { graphql } from "@/gql";
 import type { ArticlesQuery } from "@/gql/graphql";
 
@@ -10,6 +9,7 @@ import { Button } from "@repo/ui/form/button";
 import { Heading } from "@repo/ui/typography/heading";
 import { Suspense, useState, useTransition } from "react";
 
+import { Skeleton } from "@repo/ui/feedback/skeleton";
 import { Icon } from "@repo/ui/media/icon";
 import { LinkBox, LinkOverlay } from "@repo/ui/navigation/link";
 import { motion } from "motion/react";
@@ -39,6 +39,76 @@ const GET_ARTICLES = graphql(`
   }
 `);
 
+// Skeleton component for featured article
+function FeaturedArticleSkeleton() {
+  return (
+    <div className="overflow-hidden rounded-xl bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700">
+      <div className="p-8 md:p-12">
+        <Skeleton className="mb-4 h-6 w-24 rounded-full" />
+        <Skeleton className="mb-4 h-10 w-3/4 rounded-md" />
+        <div className="mb-6 space-y-2">
+          <Skeleton className="h-4 w-full rounded-md" />
+          <Skeleton className="h-4 w-5/6 rounded-md" />
+          <Skeleton className="h-4 w-4/6 rounded-md" />
+        </div>
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 rounded-md" />
+            <Skeleton className="h-3 w-24 rounded-md" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Skeleton component for article cards
+function ArticleCardSkeleton({ delay = 0 }) {
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay }}>
+      <Card className="h-full overflow-hidden border border-gray-100 dark:border-gray-800">
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-6 w-6 rounded-full" />
+            <Skeleton className="h-4 w-24 rounded-md" />
+          </div>
+          <Skeleton className="mt-2 h-7 w-full rounded-md" />
+        </CardHeader>
+        <CardBody className="gap-3">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-4 w-5/6 rounded-md" />
+            <Skeleton className="h-4 w-4/6 rounded-md" />
+          </div>
+          <div className="flex items-center justify-between gap-2 pt-3">
+            <Skeleton className="h-6 w-20 rounded-md" />
+            <Skeleton className="h-6 w-12 rounded-md" />
+          </div>
+        </CardBody>
+      </Card>
+    </motion.div>
+  );
+}
+
+// Skeleton loading for article grid
+function ArticleGridSkeleton() {
+  return (
+    <div className="space-y-8">
+      <FeaturedArticleSkeleton />
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+          <ArticleCardSkeleton key={index} delay={index * 0.05} />
+        ))}
+      </div>
+      <div className="mt-8 flex justify-center">
+        <Skeleton className="h-12 w-48 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
 export default function ArticlesPage() {
   return (
     <div className="space-y-6">
@@ -58,13 +128,7 @@ export default function ArticlesPage() {
         </motion.div>
       </div>
 
-      <Suspense
-        fallback={
-          <div className="flex h-64 items-center justify-center">
-            <RefreshSpinner className="h-16 w-16 text-purple-500" />
-          </div>
-        }
-      >
+      <Suspense fallback={<ArticleGridSkeleton />}>
         <ArticleList />
       </Suspense>
     </div>
@@ -153,7 +217,7 @@ export function ArticleList() {
               <div className="relative p-8 md:p-12">
                 <Badge variant="outline" className="mb-4 bg-white/90 text-amber-600 backdrop-blur-md">
                   <Icon as={LuTrendingUp} className="mr-1 h-3 w-3" /> Featured
-                </Badge>{" "}
+                </Badge>
                 <LinkOverlay asChild>
                   <Link to={`/articles/${featuredArticle.id}`} className="hover:no-underline">
                     <h2 className="mb-4 line-clamp-2 font-bold text-2xl text-white transition-colors group-hover:text-white/90">
@@ -196,10 +260,12 @@ export function ArticleList() {
             <LinkBox asChild>
               <Card className="h-full overflow-hidden border border-gray-100 backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:border-purple-200 hover:shadow-purple-100/30 hover:shadow-xl dark:border-gray-800 dark:hover:border-purple-900">
                 <CardHeader className="pb-2">
-                  <CardDescription className="flex flex h-6 w-6 items-center items-center justify-center gap-2 rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 font-bold text-gray-500 text-sm text-white text-xs uppercase">
-                    {article.author.name?.charAt(0) ?? "?"}
-                    {article.author.name}
-                  </CardDescription>
+                  <div className="flex items-center gap-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-indigo-400 to-purple-500 font-bold text-white text-xs">
+                      {article.author.name?.charAt(0) ?? "?"}
+                    </div>
+                    <CardDescription className="text-gray-500 text-sm uppercase">{article.author.name}</CardDescription>
+                  </div>
                   <LinkOverlay asChild>
                     <Link to={`/articles/${article.id}`} className="group hover:no-underline">
                       <CardTitle className="line-clamp-2 text-xl transition-colors group-hover:text-purple-600 dark:group-hover:text-purple-400">
@@ -241,20 +307,15 @@ export function ArticleList() {
         >
           <Button
             onClick={handleLoadMore}
-            disabled={isPending}
+            loading={isPending}
+            spinner={<Icon as={LuLoader} className="mr-2 h-4 w-4 animate-spin" />}
+            // loadingText="Loading more articles..."
             className="group relative overflow-hidden rounded-xl bg-gradient-to-r from-purple-500 to-indigo-500 px-8 py-6 font-medium text-white hover:from-purple-600 hover:to-indigo-600"
           >
-            {isPending ? (
-              <>
-                <Icon as={LuLoader} className="mr-2 h-4 w-4 animate-spin" />
-                Loading more articles...
-              </>
-            ) : (
-              <>
-                Load More Articles
-                <span className="-skew-x-12 -mt-0.5 absolute right-0 h-full w-12 transform bg-white/20 transition-all group-hover:translate-x-12" />
-              </>
-            )}
+            <>
+              Load More Articles
+              <span className="-skew-x-12 -mt-0.5 absolute right-0 h-full w-12 transform bg-white/20 transition-all group-hover:translate-x-12" />
+            </>
           </Button>
         </motion.div>
       )}

@@ -5,10 +5,10 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Clear existing data (optional)
-  await prisma.like.deleteMany({});
-  await prisma.comment.deleteMany({});
-  await prisma.article.deleteMany({});
-  await prisma.user.deleteMany({});
+  // await prisma.like.deleteMany({});
+  // await prisma.comment.deleteMany({});
+  // await prisma.article.deleteMany({});
+  // await prisma.user.deleteMany({});
 
   // Create users
   const usersToCreate = 20;
@@ -36,7 +36,7 @@ async function main() {
     const article = await prisma.article.create({
       data: {
         title: faker.lorem.sentence({ min: 3, max: 8 }),
-        content: faker.lorem.paragraphs({ min: 2, max: 5 }),
+        content: faker.lorem.paragraphs({ min: 5, max: 10 }),
         authorId: randomUser.id,
       },
     });
