@@ -14,9 +14,9 @@ function FallbackLoading() {
 
 export default function Home() {
   return (
-    <div className="m-5 space-y-2 overflow-hidden rounded-xl border p-3">
+    <div className="relative m-5 space-y-2 rounded-xl border p-3">
       <Heading>Welcome to Our Social Network Platform!</Heading>
-      <p className="text-sm opacity-60">Connect with friends, share updates, and explore new communities.</p>
+      <p className="sticky top-0 text-sm opacity-60">Connect with friends, share updates, and explore new communities.</p>
       <p className="text-sm opacity-60">Get started by creating an account or logging in.</p>
       <Suspense fallback={<FallbackLoading />}>
         <HelloMessage />

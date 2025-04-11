@@ -5,7 +5,7 @@ export const createArticleSchema = z.object({
 });
 
 export const updateArticleSchema = z.object({
-  id: z.string().min(1, { message: "ID is required" }),
+  updateArticleId: z.string().min(1, { message: "ID is required" }),
   title: z.string().optional(),
   content: z.string().optional(),
 });

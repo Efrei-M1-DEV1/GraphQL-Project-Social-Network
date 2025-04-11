@@ -63,7 +63,6 @@ const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) 
 
           // Get refreshToken from localStorage
           const refreshToken = localStorage.getItem("refreshToken");
-
           if (!refreshToken) {
             // No refresh token means we can't recover the session
             localStorage.removeItem("token");

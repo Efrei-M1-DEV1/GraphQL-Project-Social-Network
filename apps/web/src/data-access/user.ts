@@ -1,22 +1,23 @@
 import { handleApolloError } from "@/utils/error";
 import { ApolloError, type useMutation } from "@apollo/client";
 import type { ZodType } from "@repo/utils/schemas";
+import { updateArticleSchema } from "@repo/utils/schemas/article";
 import { loginSchema, registerSchema } from "@repo/utils/schemas/auth";
 import type { ErrorResponse } from "react-router";
 
-export type UserState = {
+export type State = {
   success: boolean;
   payload?: FormData;
   error?: Record<string, string> | null;
 };
 
 async function handleMutation<TData, Output extends {}>(
-  state: UserState,
+  state: State,
   payload: FormData,
   mutation: ReturnType<typeof useMutation<TData>>[0],
   schema: ZodType<Output>,
   dataExtractor: (payload: FormData) => Record<string, FormDataEntryValue | null>,
-): Promise<UserState> {
+): Promise<State> {
   try {
     // Extract data from payload
     const extractedData = dataExtractor(payload);
@@ -72,10 +73,10 @@ async function handleMutation<TData, Output extends {}>(
 }
 
 export async function signInUser<TData>(
-  state: UserState,
+  state: State,
   payload: FormData,
   mutation: ReturnType<typeof useMutation<TData>>[0],
-): Promise<UserState> {
+): Promise<State> {
   return handleMutation(state, payload, mutation, loginSchema, (payload: FormData) => ({
     email: payload.get("email"),
     password: payload.get("password"),
@@ -83,13 +84,24 @@ export async function signInUser<TData>(
 }
 
 export async function signUpUser<TData>(
-  state: UserState,
+  state: State,
   payload: FormData,
   mutation: ReturnType<typeof useMutation<TData>>[0],
-): Promise<UserState> {
+): Promise<State> {
   return handleMutation(state, payload, mutation, registerSchema, (payload: FormData) => ({
     name: payload.get("username"),
     email: payload.get("email"),
     password: payload.get("password"),
+  }));
+}
+
+export async function updateArticle<TData>(
+  state: State,
+  payload: FormData,
+  mutation: ReturnType<typeof useMutation<TData>>[0],
+): Promise<State> {
+  return handleMutation(state, payload, mutation, updateArticleSchema, (payload: FormData) => ({
+    title: payload.get("title"),
+    content: payload.get("content"),
   }));
 }

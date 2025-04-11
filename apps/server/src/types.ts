@@ -163,6 +163,7 @@ export type Query = {
   articles: ArticleConnection;
   articlesByAuthor: ArticleConnection;
   commentsByArticle: CommentConnection;
+  hasLikedArticle: Scalars["Boolean"]["output"];
   hello?: Maybe<Scalars["String"]["output"]>;
   users: Array<User>;
 };
@@ -187,6 +188,10 @@ export type QueryCommentsByArticleArgs = {
   articleId: Scalars["Int"]["input"];
   first?: InputMaybe<Scalars["Int"]["input"]>;
   sort?: InputMaybe<SortOrder>;
+};
+
+export type QueryHasLikedArticleArgs = {
+  articleId: Scalars["Int"]["input"];
 };
 
 export enum SortOrder {
@@ -482,6 +487,12 @@ export type QueryResolvers<
     ParentType,
     ContextType,
     RequireFields<QueryCommentsByArticleArgs, "articleId">
+  >;
+  hasLikedArticle?: Resolver<
+    ResolversTypes["Boolean"],
+    ParentType,
+    ContextType,
+    RequireFields<QueryHasLikedArticleArgs, "articleId">
   >;
   hello?: Resolver<Maybe<ResolversTypes["String"]>, ParentType, ContextType>;
   users?: Resolver<Array<ResolversTypes["User"]>, ParentType, ContextType>;
