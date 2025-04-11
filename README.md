@@ -137,18 +137,27 @@ Follow these steps to set up the project locally:
 ---
 
 4. **Start the servers:**
+
+   - **Seed the database with test data:**
+     ```bash
+     pnpm seed
+     ```
+     - Initializes the database with test/demo data.
+
    - **Backend (Apollo Server):**
      ```bash
      cd apps/server
      pnpm dev
      ```
      - Runs on `http://localhost:4000` by default.
+
    - **Frontend (React with Vite):**
      ```bash
      cd apps/web
      pnpm dev
      ```
      - Runs on `http://localhost:5173` by default.
+
 
 ---
 
